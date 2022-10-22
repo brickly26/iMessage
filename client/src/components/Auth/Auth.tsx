@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Button, Center, Stack, Text, Image, Input } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import { signIn } from "next-auth/react";
+import { useMutation } from "@apollo/client";
+import UserOperations from "../../graphql/operations/user";
+import { CreateUsernameData, CreateUsernameVariables } from "../../util/types";
 
 interface IAuthProps {
   session: Session | null;
@@ -12,17 +15,23 @@ const Auth: React.FunctionComponent<IAuthProps> = ({
   session,
   reloadSession,
 }) => {
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
+
+  const [createUsername, { data, loading, error }] = useMutation<
+    CreateUsernameData,
+    CreateUsernameVariables
+  >(UserOperations.Mutations.createUserName);
+
+  console.log("here Is data", data, loading, error);
 
   const onSubmit = async () => {
+    if (!username) return;
     try {
-      
-      // createUsername mutation to send our username to GraphQL API
-
+      await createUsername({ variables: { username } });
     } catch (error) {
-      console.log('onSubmit Error: ', error)
+      console.log("onSubmit Error: ", error);
     }
-  }
+  };
 
   return (
     <Center height="100vh">
@@ -35,7 +44,9 @@ const Auth: React.FunctionComponent<IAuthProps> = ({
               value={username}
               onChange={(event) => setUsername(event.target.value)}
             />
-            <Button width="100%" onClick={onSubmit}>Save</Button>
+            <Button width="100%" onClick={onSubmit}>
+              Save
+            </Button>
           </>
         ) : (
           <>
