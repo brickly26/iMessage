@@ -8,6 +8,7 @@ import express from 'express';
 import http from 'http';
 import { getSession } from 'next-auth/react';
 import * as dotenv from 'dotenv'
+import { PrismaClient } from '@prisma/client'
 
 import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
@@ -23,6 +24,9 @@ async function main() {
     resolvers
   });
 
+  //Context paramaters
+  const prisma = new PrismaClient()
+
   const corsOptions = {
     origin: process.env.CLIENT_ORIGIN,
     credentials: true,
@@ -34,7 +38,7 @@ async function main() {
     cache: 'bounded',
     context: async ({ req, res }): Promise<GrapghQLContext> => {
       const session = await getSession({ req })
-      return { session }
+      return { session, prisma }
     },
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),

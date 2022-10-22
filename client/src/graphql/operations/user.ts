@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 
 export default {
   Queries: {},
-  Mutation: {
+  Mutations: {
     createUserName: gql`
       mutation CreateUsername($username: String!) {
         createUsername(username: $username) {
@@ -12,5 +12,5 @@ export default {
       }
     `
   },
-  Subscription: {},
+  Subscriptions: {},
 }
