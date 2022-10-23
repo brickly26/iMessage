@@ -4,10 +4,12 @@ import { SearchedUser } from "../../../../util/types";
 
 interface UserSearchListProps {
   users: Array<SearchedUser>;
+  addParticipant: (user: SearchedUser) => void
 }
 
 const UserSearchList: React.FunctionComponent<UserSearchListProps> = ({
   users,
+  addParticipant
 }) => {
   return (
     <>
@@ -34,7 +36,7 @@ const UserSearchList: React.FunctionComponent<UserSearchListProps> = ({
                 <Button
                   bg="brand.100"
                   _hover={{ bg: "brand.100" }}
-                  onClick={() => {}}
+                  onClick={() => addParticipant(user)}
                 >
                   Select
                 </Button>

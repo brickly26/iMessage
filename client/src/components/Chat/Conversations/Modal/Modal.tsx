@@ -14,8 +14,13 @@ import {
 } from "@chakra-ui/react";
 import { useLazyQuery } from "@apollo/client";
 import userOperations from "../../../../graphql/operations/user";
-import { SearchUsersData, SearchUsersInput } from "../../../../util/types";
+import {
+  SearchedUser,
+  SearchUsersData,
+  SearchUsersInput,
+} from "../../../../util/types";
 import UserSearchList from "./UserSearchList";
+import Participants from "./participants";
 
 interface ModalProps {
   isOpen: boolean;
@@ -24,18 +29,27 @@ interface ModalProps {
 
 const ConversationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const [username, setUsername] = useState("");
+  const [participants, setParticipants] = useState<Array<SearchedUser>>([]);
+
   const [searchUsers, { data, loading, error }] = useLazyQuery<
     SearchUsersData,
     SearchUsersInput
   >(userOperations.Queries.searchUsers);
 
-  console.log('here is search data', data)
-
   const onSearch = (event: React.FormEvent) => {
     event?.preventDefault();
 
     // searchUsers query
-    searchUsers({ variables: { username }});
+    searchUsers({ variables: { username } });
+  };
+
+  const addParticipant = (user: SearchedUser) => {
+    setParticipants((prev) => [...prev, user]);
+    setUsername("");
+  };
+
+  const removeParticipant = (userId: string) => {
+    setParticipants((prev) => prev.filter((user) => user.id !== userId));
   };
 
   return (
@@ -58,7 +72,28 @@ const ConversationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                 </Button>
               </Stack>
             </form>
-            {data?.searchUsers && <UserSearchList users={data?.searchUsers} />}
+            {data?.searchUsers && (
+              <UserSearchList
+                users={data?.searchUsers}
+                addParticipant={addParticipant}
+              />
+            )}
+            {participants.length !== 0 && (
+              <>
+                <Participants
+                  participants={participants}
+                  removeParticipant={removeParticipant}
+                />
+                <Button
+                  bg="brand.100"
+                  width="100%"
+                  mt={6}
+                  _hover={{ bg: "brand.100" }}
+                >
+                  Create Conversation
+                </Button>
+              </>
+            )}
           </ModalBody>
         </ModalContent>
       </Modal>

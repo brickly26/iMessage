@@ -34,8 +34,6 @@ const resolvers = {
           },
         });
 
-        console.log(users);
-
         return users;
       } catch (error: any) {
         console.log("searchUsers error", error);
