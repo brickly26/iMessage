@@ -40,8 +40,7 @@ async function main() {
     cache: 'bounded',
     context: async ({ req, res }): Promise<GrapghQLContext> => {
       const session = await getSession({ req }) as Session;
-
-      console.log(session)
+      
       return { session, prisma }
     },
     plugins: [

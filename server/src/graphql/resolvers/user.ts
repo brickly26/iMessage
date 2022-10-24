@@ -1,8 +1,45 @@
-import { CreateUsernameResponse, GrapghQLContext } from "../../util/types";
+import { User } from "@prisma/client";
+import { ApolloError } from "apollo-server-core";
+import {
+  CreateUsernameResponse,
+  GrapghQLContext,
+} from "../../util/types";
 
 const resolvers = {
   Query: {
-    searchUsers: () => {},
+    searchUsers: async (
+      _: any,
+      args: { username: string },
+      context: GrapghQLContext
+    ): Promise<Array<User>> => {
+      const { username: searchedUsername } = args;
+      const { session, prisma } = context;
+
+      if (!session?.user) {
+        throw new ApolloError("Not authorized");
+      }
+
+      const {
+        user: { username: myUsername },
+      } = session;
+
+      try {
+        const users = await prisma.user.findMany({
+          where: {
+            username: {
+              contains: searchedUsername,
+              // not: myUsername,
+              mode: "insensitive",
+            },
+          },
+        });
+
+        return users;
+      } catch (error: any) {
+        console.log("searchUsers error", error);
+        throw new ApolloError(error?.message);
+      }
+    },
   },
   Mutation: {
     createUsername: async (
@@ -15,8 +52,8 @@ const resolvers = {
 
       if (!session?.user) {
         return {
-          error: 'Not authorized'
-        }
+          error: "Not authorized",
+        };
       }
 
       const { id: userId } = session.user;
@@ -26,35 +63,34 @@ const resolvers = {
         const exisitingUser = await prisma.user.findUnique({
           where: {
             username,
-          }
-        })
+          },
+        });
 
         if (exisitingUser) {
           return {
-            error: 'Username already taken. Try another'
-          }
+            error: "Username already taken. Try another",
+          };
         }
 
         //Update user
         await prisma.user.update({
           where: {
-            id: userId
+            id: userId,
           },
           data: {
-            username
-          }
-        })
+            username,
+          },
+        });
 
         return {
-          success: true
-        }
-
-      } catch(error: any) {
-        console.log('CreateUserName Error', error)
+          success: true,
+        };
+      } catch (error: any) {
+        console.log("CreateUserName Error", error);
         return {
-          error: error?.message
-        }
-      } 
+          error: error?.message,
+        };
+      }
     },
   },
 };
