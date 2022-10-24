@@ -21,6 +21,7 @@ import {
 } from "../../../../util/types";
 import UserSearchList from "./UserSearchList";
 import Participants from "./participants";
+import toast from "react-hot-toast";
 
 interface ModalProps {
   isOpen: boolean;
@@ -35,6 +36,15 @@ const ConversationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     SearchUsersData,
     SearchUsersInput
   >(userOperations.Queries.searchUsers);
+
+  const onCreateConversation = async () => {
+    try {
+      // createConversation mutation
+    } catch (error: any) {
+      console.log("onCreateConversation error", error)
+      toast.error(error?.message)
+    }
+  }
 
   const onSearch = (event: React.FormEvent) => {
     event?.preventDefault();
@@ -89,6 +99,7 @@ const ConversationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                   width="100%"
                   mt={6}
                   _hover={{ bg: "brand.100" }}
+                  onClick={() => {}}
                 >
                   Create Conversation
                 </Button>
