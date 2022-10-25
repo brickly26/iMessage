@@ -12,9 +12,12 @@ import {
   Input,
   Button,
 } from "@chakra-ui/react";
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import userOperations from "../../../../graphql/operations/user";
+import conversationOperation from "../../../../graphql/operations/conversation";
 import {
+  CreateConversationData,
+  CreateConversationVariables,
   SearchedUser,
   SearchUsersData,
   SearchUsersInput,
@@ -37,14 +40,19 @@ const ConversationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     SearchUsersInput
   >(userOperations.Queries.searchUsers);
 
+  const [createConversation, { loading: createConversationLoading }] = useMutation<
+    CreateConversationData,
+    CreateConversationVariables
+  >(conversationOperation.Mutations.createConversation);
+
   const onCreateConversation = async () => {
     try {
       // createConversation mutation
     } catch (error: any) {
-      console.log("onCreateConversation error", error)
-      toast.error(error?.message)
+      console.log("onCreateConversation error", error);
+      toast.error(error?.message);
     }
-  }
+  };
 
   const onSearch = (event: React.FormEvent) => {
     event?.preventDefault();
@@ -100,6 +108,7 @@ const ConversationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                   mt={6}
                   _hover={{ bg: "brand.100" }}
                   onClick={() => {}}
+                  isLoading={createConversationLoading}
                 >
                   Create Conversation
                 </Button>
