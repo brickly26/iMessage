@@ -36,6 +36,6 @@ export interface CreateConversationData {
   }
 }
 
-export interface CreateConversationVariables {
+export interface CreateConversationInput {
   participantIds: Array<string>;
 }

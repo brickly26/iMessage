@@ -17,7 +17,7 @@ import userOperations from "../../../../graphql/operations/user";
 import conversationOperation from "../../../../graphql/operations/conversation";
 import {
   CreateConversationData,
-  CreateConversationVariables,
+  CreateConversationInput,
   SearchedUser,
   SearchUsersData,
   SearchUsersInput,
@@ -25,13 +25,22 @@ import {
 import UserSearchList from "./UserSearchList";
 import Participants from "./participants";
 import toast from "react-hot-toast";
+import { Session } from "next-auth";
 
 interface ModalProps {
+  session: Session;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const ConversationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+const ConversationModal: React.FC<ModalProps> = ({
+  session,
+  isOpen,
+  onClose,
+}) => {
+  const {
+    user: { id: userId },
+  } = session;
   const [username, setUsername] = useState("");
   const [participants, setParticipants] = useState<Array<SearchedUser>>([]);
 
@@ -40,14 +49,24 @@ const ConversationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     SearchUsersInput
   >(userOperations.Queries.searchUsers);
 
-  const [createConversation, { loading: createConversationLoading }] = useMutation<
-    CreateConversationData,
-    CreateConversationVariables
-  >(conversationOperation.Mutations.createConversation);
+  const [createConversation, { loading: createConversationLoading }] =
+    useMutation<CreateConversationData, CreateConversationInput>(
+      conversationOperation.Mutations.createConversation
+    );
 
   const onCreateConversation = async () => {
     try {
       // createConversation mutation
+
+      const participantIds = [userId, ...participants.map((participant) => participant.id)];
+
+      const { data } = await createConversation({
+        variables: {
+          participantIds,
+        },
+      });
+
+      console.log('Here is data', data)
     } catch (error: any) {
       console.log("onCreateConversation error", error);
       toast.error(error?.message);
@@ -107,8 +126,8 @@ const ConversationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                   width="100%"
                   mt={6}
                   _hover={{ bg: "brand.100" }}
-                  onClick={() => {}}
                   isLoading={createConversationLoading}
+                  onClick={onCreateConversation}
                 >
                   Create Conversation
                 </Button>

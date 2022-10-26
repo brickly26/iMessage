@@ -4,8 +4,8 @@ export default {
   Queries: {},
   Mutations: {
     createConversation: gql`
-      mutation CreateConversation($participantId: [String]!) {
-        createConversation(participantId: $participantId) {
+      mutation CreateConversation($participantIds: [String]!) {
+        createConversation(participantIds: $participantIds) {
           conversationId
         }
       }
