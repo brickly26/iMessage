@@ -26,6 +26,7 @@ import UserSearchList from "./UserSearchList";
 import Participants from "./participants";
 import toast from "react-hot-toast";
 import { Session } from "next-auth";
+import { useRouter } from "next/router";
 
 interface ModalProps {
   session: Session;
@@ -41,6 +42,9 @@ const ConversationModal: React.FC<ModalProps> = ({
   const {
     user: { id: userId },
   } = session;
+
+  const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [participants, setParticipants] = useState<Array<SearchedUser>>([]);
 
@@ -57,7 +61,6 @@ const ConversationModal: React.FC<ModalProps> = ({
   const onCreateConversation = async () => {
     try {
       // createConversation mutation
-
       const participantIds = [userId, ...participants.map((participant) => participant.id)];
 
       const { data } = await createConversation({
@@ -66,7 +69,21 @@ const ConversationModal: React.FC<ModalProps> = ({
         },
       });
 
-      console.log('Here is data', data)
+      if (!data?.createConversation) {
+        throw new Error("Failed to create conversation")
+      }
+
+      const {
+        createConversation: { conversationId }
+      } = data;
+
+      router.push({ query: { conversationId } });
+
+      // Clear State and close modal on successful creation
+
+      setParticipants([]);
+      setUsername('');
+      onClose();
     } catch (error: any) {
       console.log("onCreateConversation error", error);
       toast.error(error?.message);
