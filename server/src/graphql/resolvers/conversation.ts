@@ -3,6 +3,13 @@ import { ApolloError } from "apollo-server-core";
 import { Prisma } from "@prisma/client";
 
 const resolvers = {
+  Query: {
+    conversations: async (_: any, __: any, context: GrapghQLContext) => {
+      const { session, prisma } = context
+
+
+    },
+  },
   Mutation: {
     createConversation: async (
       _: any,
@@ -12,7 +19,7 @@ const resolvers = {
       const { session, prisma } = context;
       const { participantIds } = args;
 
-      console.log('helloworld', participantIds)
+      console.log("helloworld", participantIds);
 
       if (!session?.user) {
         throw new ApolloError("Not authorized");
@@ -41,8 +48,8 @@ const resolvers = {
         // emit a CONVERSATION_CREATED event using pubsub
 
         return {
-          conversationId: conversation.id
-        }
+          conversationId: conversation.id,
+        };
       } catch (error) {
         console.log("create conversation error", error);
         throw new ApolloError("Error creating conversation");
