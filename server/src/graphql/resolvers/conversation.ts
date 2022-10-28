@@ -7,7 +7,7 @@ const resolvers = {
     conversations: async (_: any, __: any, context: GrapghQLContext) => {
       const { session, prisma } = context
 
-
+      console.log("CONVERSATIONS QUERY")
     },
   },
   Mutation: {
