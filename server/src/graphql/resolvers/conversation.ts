@@ -1,13 +1,54 @@
-import { GrapghQLContext } from "../../util/types";
+import { ConversationPopulated, GrapghQLContext } from "../../util/types";
 import { ApolloError } from "apollo-server-core";
 import { Prisma } from "@prisma/client";
 
 const resolvers = {
   Query: {
-    conversations: async (_: any, __: any, context: GrapghQLContext) => {
-      const { session, prisma } = context
+    conversations: async (_: any, __: any, context: GrapghQLContext): Promise<Array<ConversationPopulated>> => {
+      const { session, prisma } = context;
 
-      console.log("CONVERSATIONS QUERY")
+      if (!session?.user) {
+        throw new ApolloError("Not authorized");
+      }
+
+      const {
+        user: { id: userId },
+      } = session;
+
+      try {
+        /**
+         * Find all conversations that user is a part of
+         */
+        const conversations = await prisma.conversation.findMany({
+          /**
+           * Below has been confrims to be the correct
+           * query by the Prisma team. Had been confirmed
+           * that there is an issue on their end
+           * Issue seems specifi to Mongo
+           */
+          // where: {
+          //   participants: {
+          //     some: {
+          //       userId: {
+          //         equals: userId,
+          //       }
+          //     }
+          //   }
+          // },
+          include: conversationPopulated,
+        });
+
+        /**
+         * Since above query does not work
+         */
+        return conversations.filter(
+          (conversation) =>
+            !!conversation.participants.find((p) => (p.userId = userId))
+        );
+      } catch (error: any) {
+        console.log("conversations error", error);
+        throw new ApolloError(error?.message);
+      }
     },
   },
   Mutation: {
