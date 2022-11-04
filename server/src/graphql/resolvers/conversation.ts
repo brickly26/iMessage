@@ -4,10 +4,15 @@ import { Prisma } from "@prisma/client";
 
 const resolvers = {
   Query: {
-    conversations: async (_: any, __: any, context: GrapghQLContext): Promise<Array<ConversationPopulated>> => {
+    conversations: async (
+      _: any,
+      __: any,
+      context: GrapghQLContext
+    ): Promise<Array<ConversationPopulated>> => {
       const { session, prisma } = context;
 
       if (!session?.user) {
+        console.log("why")
         throw new ApolloError("Not authorized");
       }
 
@@ -59,8 +64,6 @@ const resolvers = {
     ): Promise<{ conversationId: string }> => {
       const { session, prisma } = context;
       const { participantIds } = args;
-
-      console.log("helloworld", participantIds);
 
       if (!session?.user) {
         throw new ApolloError("Not authorized");
