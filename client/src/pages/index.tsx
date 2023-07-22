@@ -12,7 +12,7 @@ const Home: NextPage = () => {
       ) : (
         <button onClick={() => signIn("google")}>Sign In</button>
       )}
-      {data?.user.name}
+      {data?.user?.name}
     </div>
   );
 };
