@@ -11,7 +11,7 @@ const Home: NextPage = () => {
 
   console.log("HERE IS DATA", data);
 
-  return <Box>{data?.user?.username ? <Chat /> : <Auth />}</Box>;
+  return <Box>{data?.user.username ? <Chat /> : <Auth />}</Box>;
 };
 
 export async function getServerSideProps(context: NextPageContext) {
