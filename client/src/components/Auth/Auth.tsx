@@ -11,20 +11,28 @@ interface IAuthProps {
 const Auth: React.FC<IAuthProps> = ({ session, reloadSession }) => {
   const [username, setUsername] = useState("");
 
-  const onSubmit = async () => {};
+  const onSubmit = async () => {
+    try {
+      // createUsername Mutation to send our username to the Graphql API
+    } catch (error) {
+      console.log("onSubmit Error", error);
+    }
+  };
 
   return (
     <Center width="100vw" height="100vh">
       <Stack align="center" spacing={8}>
         {session ? (
           <>
-            <Text>Create a Username</Text>
+            <Text fontSize={"3xl"}>Create a Username</Text>
             <Input
               placeholder="Enter a name"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
-            <Button onClick={onSubmit}>Save</Button>
+            <Button width="100%" onClick={onSubmit}>
+              Save
+            </Button>
           </>
         ) : (
           <>
