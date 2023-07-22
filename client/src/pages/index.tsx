@@ -5,6 +5,7 @@ const Home: NextPage = () => {
   const { data } = useSession();
 
   console.log("HERE IS DATA", data);
+
   return (
     <div>
       {data?.user ? (
