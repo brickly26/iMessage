@@ -8,7 +8,9 @@ import http from "http";
 import typeDefs from "./graphql/typeDefs";
 import resolvers from "./graphql/resolvers";
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import { getSession } from "next-auth/react";
 import * as dotenv from "dotenv";
+import { GraphQLContext } from "./util/types";
 
 async function main() {
   dotenv.config();
@@ -29,6 +31,29 @@ async function main() {
     schema,
     csrfPrevention: true,
     cache: "bounded",
+    context: async ({ req, res }): Promise<GraphQLContext> => {
+      const cookies = req?.headers?.cookie;
+      const parsedCookies = require("cookie").parse(cookies);
+      const sessionToken = parsedCookies["next-auth.session-token"];
+      if (sessionToken) {
+        const sessionResponse = await fetch(
+          "http://localhost:3000/api/auth/session",
+          {
+            headers: {
+              Cookie: `next-auth.session-token=${sessionToken}`,
+            },
+          }
+        );
+
+        const sessionData = await sessionResponse.json();
+        console.log("sessionData", sessionData);
+        return {
+          session: sessionData,
+        };
+      } else {
+        return { session: null };
+      }
+    },
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),
       ApolloServerPluginLandingPageLocalDefault({ embed: true }),
