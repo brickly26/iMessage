@@ -11,6 +11,7 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import { getSession } from "next-auth/react";
 import * as dotenv from "dotenv";
 import { GraphQLContext } from "./util/types";
+import { PrismaClient } from "@prisma/client";
 
 async function main() {
   dotenv.config();
@@ -26,6 +27,9 @@ async function main() {
     origin: process.env.CLIENT_ORIGIN,
     credentials: true,
   };
+
+  // Context parameters
+  const prisma = new PrismaClient();
 
   const server = new ApolloServer({
     schema,
@@ -45,13 +49,14 @@ async function main() {
           }
         );
 
-        const sessionData = await sessionResponse.json();
-        console.log("sessionData", sessionData);
+        const session = await sessionResponse.json();
+        console.log("sessionData", session);
         return {
-          session: sessionData,
+          session,
+          prisma,
         };
       } else {
-        return { session: null };
+        return { session: null, prisma };
       }
     },
     plugins: [
