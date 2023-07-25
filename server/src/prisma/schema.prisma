@@ -5,7 +5,7 @@ datasource db {
 
 generator client {
   provider        = "prisma-client-js"
-  binaryTargets   = ["native", "darwin"]
+  binaryTargets   = ["native", "darwin", "darwin-arm64"]
 }
 
 model Account {
@@ -38,8 +38,8 @@ model Session {
 model User {
   id            String  @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
-  username      String?   @unique
   email         String?   @unique
+  username      String?   @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
