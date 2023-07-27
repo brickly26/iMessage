@@ -50,7 +50,6 @@ async function main() {
         );
 
         const session = await sessionResponse.json();
-        console.log("sessionData", session);
         return {
           session,
           prisma,
