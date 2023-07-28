@@ -14,18 +14,31 @@ interface IAuthProps {
 const Auth: React.FC<IAuthProps> = ({ session, reloadSession }) => {
   const [username, setUsername] = useState("");
 
-  const [createUsername, { data, loading, error }] = useMutation<
+  const [createUsername, { loading, error }] = useMutation<
     CreateUsernameData,
     CreateUsernameVariables
   >(UserOperations.Mutation.createUsername);
-
-  console.log("HERE IS DATA", data, loading, error);
 
   const onSubmit = async () => {
     if (!username) return;
     try {
       // createUsername Mutation to send our username to the Graphql API
-      await createUsername({ variables: { username } });
+      const { data } = await createUsername({ variables: { username } });
+
+      if (!data?.createUsername) {
+        throw new Error();
+      }
+
+      if (data?.createUsername.error) {
+        const {
+          createUsername: { error },
+        } = data;
+
+        throw new Error(error);
+      }
+
+      // Reload session to obtainnew username;
+      reloadSession();
     } catch (error) {
       console.log("onSubmit Error", error);
     }
@@ -42,7 +55,7 @@ const Auth: React.FC<IAuthProps> = ({ session, reloadSession }) => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
-            <Button width="100%" onClick={onSubmit}>
+            <Button width="100%" onClick={onSubmit} isLoading={loading}>
               Save
             </Button>
           </>
