@@ -14,7 +14,14 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import UserOperations from "../../../../graphql/operations/users";
-import { SearchUsersData, SearchUsersInput } from "../../../../util/types";
+import {
+  SearchUsersData,
+  SearchUsersInput,
+  SearchedUser,
+} from "../../../../util/types";
+import UserSearchList from "./UserSearchList";
+import Participants from "./Participants";
+import { toast } from "react-hot-toast";
 
 interface ConversationModalProps {
   isOpen: boolean;
@@ -26,16 +33,33 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
   onClose,
 }) => {
   const [username, setUsername] = useState("");
+  const [participants, setParticipants] = useState<Array<SearchedUser>>([]);
   const [searchUsers, { data, loading, error }] = useLazyQuery<
     SearchUsersData,
     SearchUsersInput
   >(UserOperations.Queries.searchUsers);
 
-  console.log("here is searchedUsers", data);
+  const onCreateConversation = async () => {
+    try {
+      // createConverstaion Mutation
+    } catch (error: any) {
+      console.log("onCreateConverstaion Error", error?.message);
+      toast.error(error?.message);
+    }
+  };
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
     searchUsers({ variables: { username } });
+  };
+
+  const addParticipant = (user: SearchedUser) => {
+    setParticipants((prev) => [...prev, user]);
+    setUsername("");
+  };
+
+  const removeParticipant = (userId: String) => {
+    setParticipants((prev) => prev.filter((p) => p.id !== userId));
   };
 
   return (
@@ -43,7 +67,7 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent bg="#2d2d2d" pb={4}>
-          <ModalHeader>Modal Title</ModalHeader>
+          <ModalHeader>Create a conversation</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <form onSubmit={onSearch}>
@@ -62,6 +86,29 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
                 </Button>
               </Stack>
             </form>
+            {data?.searchUsers && (
+              <UserSearchList
+                users={data.searchUsers}
+                addParticipant={addParticipant}
+              />
+            )}
+            {participants.length !== 0 && (
+              <>
+                <Participants
+                  participants={participants}
+                  removeParticipants={removeParticipant}
+                />
+                <Button
+                  bg="brand.100"
+                  width="100%"
+                  mt={6}
+                  _hover={{ bg: "brand.100" }}
+                  onClick={() => {}}
+                >
+                  Create Conversation
+                </Button>
+              </>
+            )}
           </ModalBody>
         </ModalContent>
       </Modal>
