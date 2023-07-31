@@ -1,4 +1,4 @@
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   Button,
   Input,
@@ -15,6 +15,8 @@ import {
 import { useState } from "react";
 import UserOperations from "../../../../graphql/operations/users";
 import {
+  CreateConversationData,
+  CreateConversationInput,
   SearchUsersData,
   SearchUsersInput,
   SearchedUser,
@@ -22,6 +24,7 @@ import {
 import UserSearchList from "./UserSearchList";
 import Participants from "./Participants";
 import { toast } from "react-hot-toast";
+import ConversationOperations from "../../../../graphql/operations/conversation";
 
 interface ConversationModalProps {
   isOpen: boolean;
@@ -38,6 +41,10 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
     SearchUsersData,
     SearchUsersInput
   >(UserOperations.Queries.searchUsers);
+  const [createConversation, { loading: createConversationLoading }] =
+    useMutation<CreateConversationData, CreateConversationInput>(
+      ConversationOperations.Mutation.createConversation
+    );
 
   const onCreateConversation = async () => {
     try {
@@ -103,7 +110,8 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
                   width="100%"
                   mt={6}
                   _hover={{ bg: "brand.100" }}
-                  onClick={() => {}}
+                  onClick={onCreateConversation}
+                  isLoading={createConversationLoading}
                 >
                   Create Conversation
                 </Button>

@@ -1,6 +1,8 @@
 const resolvers = {
   Mutation: {
-    createConversation: async () => {},
+    createConversation: async () => {
+      console.log("inside create conversationß");
+    },
   },
 };
 
