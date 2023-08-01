@@ -1,4 +1,4 @@
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   Button,
   Input,
@@ -15,6 +15,8 @@ import {
 import { useState } from "react";
 import UserOperations from "../../../../graphql/operations/users";
 import {
+  CreateConversationData,
+  CreateConversationInput,
   SearchUsersData,
   SearchUsersInput,
   SearchedUser,
@@ -22,26 +24,45 @@ import {
 import UserSearchList from "./UserSearchList";
 import Participants from "./Participants";
 import { toast } from "react-hot-toast";
+import ConversationOperations from "../../../../graphql/operations/conversation";
+import { Session } from "next-auth";
 
 interface ConversationModalProps {
+  session: Session;
   isOpen: boolean;
   onClose: () => void;
 }
 
 const ConversationModal: React.FC<ConversationModalProps> = ({
+  session,
   isOpen,
   onClose,
 }) => {
+  const {
+    user: { id: userId },
+  } = session;
+
   const [username, setUsername] = useState("");
   const [participants, setParticipants] = useState<Array<SearchedUser>>([]);
   const [searchUsers, { data, loading, error }] = useLazyQuery<
     SearchUsersData,
     SearchUsersInput
   >(UserOperations.Queries.searchUsers);
+  const [createConversation, { loading: createConversationLoading }] =
+    useMutation<CreateConversationData, CreateConversationInput>(
+      ConversationOperations.Mutations.createConversation
+    );
 
   const onCreateConversation = async () => {
+    const participantIds = [userId, ...participants.map((p) => p.id)];
+
     try {
-      // createConverstaion Mutation
+      const { data } = await createConversation({
+        variables: {
+          participantIds,
+        },
+      });
+      console.log("what", data);
     } catch (error: any) {
       console.log("onCreateConverstaion Error", error?.message);
       toast.error(error?.message);
@@ -103,7 +124,8 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
                   width="100%"
                   mt={6}
                   _hover={{ bg: "brand.100" }}
-                  onClick={() => {}}
+                  onClick={onCreateConversation}
+                  isLoading={createConversationLoading}
                 >
                   Create Conversation
                 </Button>
