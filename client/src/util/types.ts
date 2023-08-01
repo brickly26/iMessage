@@ -28,7 +28,7 @@ export interface SearchedUser {
 
 export interface CreateConversationData {
   createConversation: {
-    conversationId: String;
+    conversationId: string;
   };
 }
 

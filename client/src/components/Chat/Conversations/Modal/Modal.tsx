@@ -25,16 +25,23 @@ import UserSearchList from "./UserSearchList";
 import Participants from "./Participants";
 import { toast } from "react-hot-toast";
 import ConversationOperations from "../../../../graphql/operations/conversation";
+import { Session } from "next-auth";
 
 interface ConversationModalProps {
+  session: Session;
   isOpen: boolean;
   onClose: () => void;
 }
 
 const ConversationModal: React.FC<ConversationModalProps> = ({
+  session,
   isOpen,
   onClose,
 }) => {
+  const {
+    user: { id: userId },
+  } = session;
+
   const [username, setUsername] = useState("");
   const [participants, setParticipants] = useState<Array<SearchedUser>>([]);
   const [searchUsers, { data, loading, error }] = useLazyQuery<
@@ -43,12 +50,19 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
   >(UserOperations.Queries.searchUsers);
   const [createConversation, { loading: createConversationLoading }] =
     useMutation<CreateConversationData, CreateConversationInput>(
-      ConversationOperations.Mutation.createConversation
+      ConversationOperations.Mutations.createConversation
     );
 
   const onCreateConversation = async () => {
+    const participantIds = [userId, ...participants.map((p) => p.id)];
+
     try {
-      // createConverstaion Mutation
+      const { data } = await createConversation({
+        variables: {
+          participantIds,
+        },
+      });
+      console.log("what", data);
     } catch (error: any) {
       console.log("onCreateConverstaion Error", error?.message);
       toast.error(error?.message);

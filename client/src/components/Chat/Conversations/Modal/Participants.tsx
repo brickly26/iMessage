@@ -11,7 +11,6 @@ const Participants: React.FC<ParticipantsProps> = ({
   participants,
   removeParticipants,
 }) => {
-  console.log("participants", participants);
   return (
     <Flex mt={8} gap="10px" flexWrap="wrap">
       {participants.map((participant) => (

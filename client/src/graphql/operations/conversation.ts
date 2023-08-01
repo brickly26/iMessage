@@ -2,14 +2,14 @@ import { gql } from "@apollo/client";
 
 export default {
   Queries: {},
-  Mutation: {
+  Mutations: {
     createConversation: gql`
-      mutation createConversation($participantIds: [String]!) {
+      mutation CreateConversation($participantIds: [String]!) {
         createConversation(participantIds: $participantIds) {
-          conversationId: String
+          conversationId
         }
       }
     `,
   },
-  Subscription: {},
+  Subscriptions: {},
 };
