@@ -1,3 +1,5 @@
+import { ConversationPopulated } from "../../../server/src/util/types";
+
 // Users
 
 export interface CreateUsernameData {
@@ -34,4 +36,8 @@ export interface CreateConversationData {
 
 export interface CreateConversationInput {
   participantIds: Array<string>;
+}
+
+export interface ConversationsData {
+  conversations: Array<ConversationPopulated>;
 }
