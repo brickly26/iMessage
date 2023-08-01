@@ -62,6 +62,9 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
           participantIds,
         },
       });
+
+      console.log("Here is create conversation data", data);
+
       console.log("what", data);
     } catch (error: any) {
       console.log("onCreateConverstaion Error", error?.message);
