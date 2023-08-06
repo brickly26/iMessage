@@ -51,7 +51,7 @@ const resolvers = {
       context: GraphQLContext
     ): Promise<{ conversationId: string }> => {
       const { participantIds } = args;
-      const { session, prisma } = context;
+      const { session, prisma, pubsub } = context;
 
       console.log("IDS", participantIds);
 
@@ -77,6 +77,9 @@ const resolvers = {
         });
 
         // emit a Conversation created event using pubsub
+        pubsub.publish("CONVERSATION_CREATED", {
+          conversationCreated: conversation,
+        });
 
         return {
           conversationId: conversation.id,
@@ -87,6 +90,7 @@ const resolvers = {
       }
     },
   },
+  Subscription,
 };
 
 export const participantPopulated =
