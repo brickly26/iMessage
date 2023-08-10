@@ -90,7 +90,11 @@ const resolvers = {
       }
     },
   },
-  Subscription,
+  Subscription {
+    conversationCreated: {
+      subscribe: (_: any, __: any;) => {}
+    }
+  }
 };
 
 export const participantPopulated =
