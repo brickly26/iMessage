@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useMutation } from "@apollo/client";
 import UserOperations from "../../graphql/operations/users";
 import { CreateUsernameData, CreateUsernameVariables } from "../../util/types";
+import { toast } from "react-hot-toast";
 
 interface IAuthProps {
   session: Session | null;
@@ -34,12 +35,17 @@ const Auth: React.FC<IAuthProps> = ({ session, reloadSession }) => {
           createUsername: { error },
         } = data;
 
+        toast.error(error);
+
         throw new Error(error);
       }
+
+      toast.success("Username successfully created");
 
       // Reload session to obtainnew username;
       reloadSession();
     } catch (error) {
+      toast.error("There was an error");
       console.log("onSubmit Error", error);
     }
   };
