@@ -36,9 +36,15 @@ const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
       ) => {
         if (!subscriptionData.data) return prev;
 
-        console.log("subscription data", subscriptionData);
-
         const newConversation = subscriptionData.data.conversationCreated;
+
+        if (
+          prev.conversations.find(
+            (conversation) => conversation.id === newConversation.id
+          )
+        ) {
+          return prev;
+        }
 
         return Object.assign({}, prev, {
           conversations: [newConversation, ...prev.conversations],
