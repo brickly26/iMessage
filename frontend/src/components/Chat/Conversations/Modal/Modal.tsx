@@ -1,4 +1,4 @@
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   Button,
   Modal,
@@ -13,6 +13,8 @@ import {
 import { useState } from "react";
 import userOperations from "../../../../graphql/operations/user";
 import {
+  CreateConversationData,
+  CreateConversationVariables,
   SearchUsersData,
   SearchUsersVariables,
   SearchedUser,
@@ -20,25 +22,41 @@ import {
 import UserSearchList from "./UserSearchList";
 import Participants from "./Participants";
 import toast from "react-hot-toast";
+import conversationOperations from "../../../../graphql/operations/conversation";
+import { Session } from "next-auth";
 
 interface ConversationModalProps {
+  session: Session;
   isOpen: boolean;
   onClose: () => void;
 }
 
 const ConversationModal: React.FC<ConversationModalProps> = ({
+  session,
   isOpen,
   onClose,
 }) => {
+  const {
+    user: { id: userId },
+  } = session;
   const [username, setUsername] = useState("");
   const [participants, setParticipants] = useState<Array<SearchedUser>>([]);
   const [searchUsers, { data, loading, error }] = useLazyQuery<
     SearchUsersData,
     SearchUsersVariables
   >(userOperations.Queries.searchUsers);
+  const [createConversation, { loading: createConversationLoading }] =
+    useMutation<CreateConversationData, CreateConversationVariables>(
+      conversationOperations.Mutations.createConversation
+    );
 
   const onCreateConverversation = async () => {
+    const participantIds = [userId, ...participants.map((p) => p.id)];
     try {
+      // createConversation mutation
+      const { data } = await createConversation({
+        variables: { participantIds },
+      });
     } catch (error: any) {
       console.log("onCreateConversation Error", error);
       toast.error(error?.message);
@@ -98,7 +116,8 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
                 width="100%"
                 mt={6}
                 _hover={{ bg: "brand.100" }}
-                onClick={() => {}}
+                onClick={onCreateConverversation}
+                isLoading={createConversationLoading}
               >
                 Create Conversation
               </Button>
