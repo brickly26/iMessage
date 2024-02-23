@@ -1,7 +1,11 @@
+import { useMutation } from "@apollo/client";
 import { Button, Center, Stack, Text, Image, Input } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import UserOperations from "../../graphql/operations/user";
+import { CreateUsernameData, CreateUsernameVariables } from "../../util/types";
+import toast from "react-hot-toast";
 
 interface AuthProps {
   session: Session | null;
@@ -11,11 +15,34 @@ interface AuthProps {
 const Auth: React.FC<AuthProps> = ({ session, reloadSession }) => {
   const [username, setUsername] = useState("");
 
+  const [createUsername, { loading, error }] = useMutation<
+    CreateUsernameData,
+    CreateUsernameVariables
+  >(UserOperations.Mutation.createUsername);
+
   const onSubmit = async () => {
+    if (!username) return;
     try {
-      // createUsername mutation to send out username to graphql API
-    } catch (error) {
+      const { data } = await createUsername({ variables: { username } });
+
+      if (!data?.createUsername) {
+        throw new Error();
+      }
+
+      if (data.createUsername.error) {
+        const {
+          createUsername: { error },
+        } = data;
+
+        throw new Error(error);
+      }
+
+      toast.success("Username successfully created!");
+      // reloade session to obtain new username
+      reloadSession();
+    } catch (error: any) {
       console.log("onsubmit error", error);
+      toast.error(error?.message);
     }
   };
 
@@ -30,7 +57,7 @@ const Auth: React.FC<AuthProps> = ({ session, reloadSession }) => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
-            <Button width="100%" onClick={onSubmit}>
+            <Button width="100%" onClick={onSubmit} isLoading={loading}>
               Save
             </Button>
           </>

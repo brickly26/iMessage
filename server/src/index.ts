@@ -8,8 +8,13 @@ import express from "express";
 import http from "http";
 import typeDefs from "./graphql/typeDefs";
 import resolvers from "./graphql/resolvers";
+import { getSession } from "next-auth/react";
+import * as dotenv from "dotenv";
+import { GraphQLContext, Session } from "./util/types";
+import { PrismaClient } from "@prisma/client";
 
 async function main() {
+  dotenv.config();
   const app = express();
   const httpServer = http.createServer(app);
 
@@ -18,17 +23,49 @@ async function main() {
     resolvers,
   });
 
+  const corsOptions = {
+    origin: process.env.CLIENT_ORIGIN,
+    credentials: true,
+  };
+
+  // Context Parameters
+  const prisma = new PrismaClient();
+  // const pubsub
+
   const server = new ApolloServer({
     schema,
     csrfPrevention: true,
     cache: "bounded",
+    context: async ({ req, res }): Promise<GraphQLContext> => {
+      const cookies = req?.headers?.cookie;
+      const parsedCookies = require("cookie").parse(cookies);
+      const sessionToken = parsedCookies["next-auth.session-token"];
+      if (sessionToken) {
+        const sessionResponse = await fetch(
+          "http://localhost:3000/api/auth/session",
+          {
+            headers: {
+              Cookie: `next-auth.session-token=${sessionToken}`,
+            },
+          }
+        );
+
+        const session = await sessionResponse.json();
+        return {
+          session,
+          prisma,
+        };
+      } else {
+        return { session: null, prisma };
+      }
+    },
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),
       ApolloServerPluginLandingPageLocalDefault({ embed: true }),
     ],
   });
   await server.start();
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ app, cors: corsOptions });
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: 4000 }, resolve)
   );
