@@ -1,6 +1,10 @@
-interface FeedWrapperProps {}
+import { Session } from "next-auth";
 
-const FeedWrapper: React.FC<FeedWrapperProps> = (props) => {
+interface FeedWrapperProps {
+  session: Session;
+}
+
+const FeedWrapper: React.FC<FeedWrapperProps> = ({ session }) => {
   return <div>FeedWrapper</div>;
 };
 
