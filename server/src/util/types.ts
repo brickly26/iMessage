@@ -29,5 +29,3 @@ export interface CreateUsernameResponse {
   success?: boolean;
   error?: string;
 }
-
-export interface CreateUsernameData {}
