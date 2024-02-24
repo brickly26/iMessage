@@ -5,21 +5,28 @@ import { useState } from "react";
 import { ConversationPopulated } from "../../../util/types";
 import ConversationItem from "./ConversationItem";
 import { signOut } from "next-auth/react";
+import { useRouter } from "next/router";
 
 interface ConversationListProps {
   session: Session;
   conversations: Array<ConversationPopulated>;
+  onViewConversation: (conversationId: string) => void;
 }
 
 const ConversationList: React.FC<ConversationListProps> = ({
   session,
   conversations,
+  onViewConversation,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onOpen = () => setIsOpen(true);
-
   const onClose = () => setIsOpen(false);
+
+  const router = useRouter();
+  const {
+    user: { id: userId },
+  } = session;
 
   return (
     <Box width="100%">
@@ -51,7 +58,13 @@ const ConversationList: React.FC<ConversationListProps> = ({
       </Box>
       <ConversationModal isOpen={isOpen} onClose={onClose} session={session} />
       {conversations.map((conversation) => (
-        <ConversationItem key={conversation.id} conversation={conversation} />
+        <ConversationItem
+          key={conversation.id}
+          conversation={conversation}
+          onClick={() => onViewConversation(conversation.id)}
+          isSelected={conversation.id === router.query.conversationId}
+          userId={userId}
+        />
       ))}
     </Box>
   );

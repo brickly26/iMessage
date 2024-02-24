@@ -67,7 +67,7 @@ export type ConversationPopulated = Prisma.ConversationGetPayload<{
   include: typeof conversationPopulated;
 }>;
 
-export type participantPopulated = Prisma.ConversationParticipantGetPayload<{
+export type ParticipantPopulated = Prisma.ConversationParticipantGetPayload<{
   include: typeof participantPopulated;
 }>;
 
