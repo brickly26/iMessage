@@ -8,13 +8,16 @@ import { Session } from "next-auth";
 const Home: NextPage = () => {
   const { data: session } = useSession();
 
-  const reloadSession = () => {};
+  const reloadSession = () => {
+    const event = new Event("visibilitychange");
+    document.dispatchEvent(event);
+  };
 
   return (
     <>
       <Box>
         {session?.user?.username ? (
-          <Chat />
+          <Chat session={session} />
         ) : (
           <Auth session={session} reloadSession={reloadSession} />
         )}
