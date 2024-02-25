@@ -16,7 +16,7 @@ const ConversationFields = `
         username
       }
       body
-      createAt
+      createdAt
     }
     updatedAt
 `;

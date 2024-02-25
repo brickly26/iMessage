@@ -50,12 +50,19 @@ const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
         }
       ) => {
         if (!subscriptionData) return prev;
+        console.log("prev", prev);
 
         const newConversation = subscriptionData.data.conversationCreated;
 
-        return Object.assign({}, prev, {
+        console.log("newConvo", newConversation);
+
+        const conversations = Object.assign({}, prev, {
           conversations: [newConversation, ...prev.conversations],
         });
+
+        console.log("convos", conversations);
+
+        return conversations;
       },
     });
   };
