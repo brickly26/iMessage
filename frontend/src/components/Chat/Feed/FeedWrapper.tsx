@@ -32,7 +32,7 @@ const FeedWrapper: React.FC<FeedWrapperProps> = ({ session }) => {
             flexGrow={1}
           >
             <MessagesHeader conversationId={conversationId} userId={userId} />
-            <Messages />
+            <Messages conversationId={conversationId} userId={userId} />
           </Flex>
           <MessageInput session={session} conversationId={conversationId} />
         </>
