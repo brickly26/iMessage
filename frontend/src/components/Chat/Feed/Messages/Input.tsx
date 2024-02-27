@@ -35,6 +35,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
       const { data, errors } = await sendMessage({
         variables: newMessage,
+        optimisticResponse: {
+          sendMessage: true,
+        },
       });
 
       if (!data?.sendMessage || error) {

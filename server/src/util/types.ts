@@ -72,7 +72,6 @@ export type MessagePopulated = Prisma.MessageGetPayload<{
 }>;
 
 export interface SendMessageArguements {
-  id: string;
   conversationId: string;
   senderId: string;
   body: string;

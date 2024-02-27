@@ -112,3 +112,11 @@ export interface SendMessageVariables {
   senderId: string;
   body: string;
 }
+
+export interface MessageSubscriptionData {
+  subscriptionData: {
+    data: {
+      messageSent: MessagePopulated;
+    };
+  };
+}

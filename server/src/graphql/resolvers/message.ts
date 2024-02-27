@@ -86,7 +86,7 @@ const resolvers = {
       const {
         user: { id: userId },
       } = session;
-      const { id: messageId, senderId, conversationId, body } = args;
+      const { senderId, conversationId, body } = args;
 
       if (userId !== senderId) {
         throw new GraphQLError("Not authorized");
@@ -160,7 +160,7 @@ const resolvers = {
         /**
          * Update Clients that conversation was updated
          */
-        pubsub.publish("MESSAGE_SENT", { messageSend: newMessage });
+        pubsub.publish("MESSAGE_SENT", { messageSent: newMessage });
         // pubsub.publish("CONVERSATION_UPDATED", {
         //   conversationUpdated: {
         //     conversation,
@@ -186,6 +186,7 @@ const resolvers = {
           args: { conversationId: string },
           context: GraphQLContext
         ) => {
+          console.log(payload);
           return payload.messageSent.conversationId === args.conversationId;
         }
       ),
