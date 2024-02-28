@@ -85,9 +85,28 @@ async function main() {
     json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
-        const session = await getSession({ req });
+        const cookies = req?.headers?.cookie;
+        const parsedCookies = require("cookie").parse(cookies);
+        const sessionToken = parsedCookies["next-auth.session-token"];
+        if (sessionToken) {
+          const sessionResponse = await fetch(
+            "http://localhost:3000/api/auth/session",
+            {
+              headers: {
+                Cookie: `next-auth.session-token=${sessionToken}`,
+              },
+            }
+          );
 
-        return { session: session as Session, prisma, pubsub };
+          const session = (await sessionResponse.json()) as Session;
+          return {
+            session,
+            prisma,
+            pubsub,
+          };
+        } else {
+          return { session: null, prisma, pubsub };
+        }
       },
     })
   );

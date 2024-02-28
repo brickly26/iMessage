@@ -7,16 +7,20 @@ const typeDefs = gql`
     createConversation(participantIds: [String]): createConversationResponse
   }
 
+  type Mutation {
+    markConversationAsRead(userId: String!, conversationId: String!): Boolean
+  }
+
   type createConversationResponse {
     conversationId: String
   }
 
   type Conversation {
     id: String
-    # latestMessage: latestMessage
+    latestMessage: Message
     participants: [Participant]
     createdAt: Date
-    updated: Date
+    updatedAt: Date
   }
 
   type Participant {

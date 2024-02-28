@@ -17,7 +17,11 @@ export default NextAuth({
   callbacks: {
     async session({ session, token, user }) {
       console.log("INSIDE OF THE SESSION CALLBACK");
-      return { ...session, user: { ...session.user, ...user } };
+      const sessionUser = { ...session.user, ...user };
+      return Promise.resolve({
+        ...session,
+        user: sessionUser,
+      });
     },
   },
 });

@@ -14,20 +14,22 @@ export const participantPopulated =
     },
   });
 
+export const messagePopulated = Prisma.validator<Prisma.MessageInclude>()({
+  sender: {
+    select: {
+      id: true,
+      username: true,
+    },
+  },
+});
+
 export const conversationPopulated =
   Prisma.validator<Prisma.ConversationInclude>()({
     participants: {
       include: participantPopulated,
     },
     latestMessage: {
-      include: {
-        sender: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-      },
+      include: messagePopulated,
     },
   });
 
@@ -83,4 +85,39 @@ export interface CreateConversationData {
 
 export interface CreateConversationVariables {
   participantIds: Array<string>;
+}
+
+/**
+ * Messages
+ */
+
+export type MessagePopulated = Prisma.MessageGetPayload<{
+  include: typeof messagePopulated;
+}>;
+
+export interface MessagesData {
+  messages: Array<MessagePopulated>;
+}
+
+export interface MessagesVariables {
+  conversationId: string;
+}
+
+export interface SendMessageData {
+  sendMessage: boolean;
+}
+
+export interface SendMessageVariables {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  body: string;
+}
+
+export interface MessageSubscriptionData {
+  subscriptionData: {
+    data: {
+      messageSent: MessagePopulated;
+    };
+  };
 }
