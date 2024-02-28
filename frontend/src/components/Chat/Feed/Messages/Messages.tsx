@@ -43,10 +43,11 @@ export const Messages: React.FC<MessagesProps> = ({
 
         const newMessage = subscriptionData.data.messageSent;
 
-        console.log(newMessage);
-        return Object.assign({}, prev, {
-          messages: [newMessage, ...prev.messages],
-        });
+        return newMessage.sender.id === userId
+          ? prev
+          : Object.assign({}, prev, {
+              messages: [newMessage, ...prev.messages],
+            });
       },
     });
   };
@@ -67,7 +68,7 @@ export const Messages: React.FC<MessagesProps> = ({
         </Stack>
       )}
       {data?.messages && (
-        <Flex direction="column-reverse" overflow="scroll" height="100%">
+        <Flex direction="column-reverse" overflowY="scroll" height="100%">
           {data.messages.map((message) => (
             <MessageItem
               key={message.id}

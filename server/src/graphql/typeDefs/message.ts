@@ -13,7 +13,12 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    sendMessage(conversationId: String, senderId: String, body: String): Boolean
+    sendMessage(
+      id: String
+      conversationId: String
+      senderId: String
+      body: String
+    ): Boolean
   }
 
   type Subscription {

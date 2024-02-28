@@ -86,7 +86,7 @@ const resolvers = {
       const {
         user: { id: userId },
       } = session;
-      const { senderId, conversationId, body } = args;
+      const { id: messageId, senderId, conversationId, body } = args;
 
       if (userId !== senderId) {
         throw new GraphQLError("Not authorized");
@@ -99,6 +99,7 @@ const resolvers = {
 
         const newMessage = await prisma.message.create({
           data: {
+            id: messageId,
             senderId: senderId,
             conversationId,
             body,
