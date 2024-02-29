@@ -162,11 +162,11 @@ const resolvers = {
          * Update Clients that conversation was updated
          */
         pubsub.publish("MESSAGE_SENT", { messageSent: newMessage });
-        // pubsub.publish("CONVERSATION_UPDATED", {
-        //   conversationUpdated: {
-        //     conversation,
-        //   },
-        // });
+        pubsub.publish("CONVERSATION_UPDATED", {
+          conversationUpdated: {
+            conversation,
+          },
+        });
       } catch (error) {
         console.log("send message error", error);
         throw new GraphQLError("Error sending message");

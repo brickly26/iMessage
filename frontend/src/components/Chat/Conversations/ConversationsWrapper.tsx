@@ -1,10 +1,11 @@
 import { Box } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import ConversationList from "./ConversationList";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
 import conversationOperations from "../../../graphql/operations/conversation";
 import {
   ConversationPopulated,
+  ConversationUpdatedData,
   ConversationsData,
   ParticipantPopulated,
 } from "../../../util/types";
@@ -38,6 +39,28 @@ const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
     { markConversationAsRead: boolean },
     { userId: string; conversationId: string }
   >(conversationOperations.Mutations.markConversationAsRead);
+
+  useSubscription<ConversationUpdatedData>(
+    conversationOperations.Subscriptions.conversationUpdated,
+    {
+      onData: ({ client, data }) => {
+        const { data: subscriptionData } = data;
+
+        if (!subscriptionData) return;
+
+        const {
+          conversationUpdated: { conversation: updatedConversation },
+        } = subscriptionData;
+
+        const currentlyViewingConversation =
+          updatedConversation.id === conversationId;
+
+        if (currentlyViewingConversation) {
+          onViewConversation(conversationId, false);
+        }
+      },
+    }
+  );
 
   const onViewConversation = async (
     conversationId: string,

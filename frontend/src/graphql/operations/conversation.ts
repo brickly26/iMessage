@@ -51,6 +51,15 @@ const conversationOperations = {
         }
       }
     `,
+    conversationUpdated: gql`
+      subscription ConversationUpdated {
+        conversationUpdated {
+          conversation {
+            ${ConversationFields}
+          }
+        }
+      }
+    `,
   },
 };
 
