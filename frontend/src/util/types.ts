@@ -96,6 +96,8 @@ export interface ConversationUpdatedData {
     //   }
     // >;
     conversation: ConversationPopulated;
+    addedUserIds: Array<string> | null;
+    removedUserIds: Array<string> | null;
   };
 }
 

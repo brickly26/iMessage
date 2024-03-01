@@ -66,6 +66,8 @@ export interface ConversationCreatedSubscriptionPayload {
 export interface ConversationUpdatedSubscriptionPayload {
   conversationUpdated: {
     conversation: ConversationPopulated;
+    addedUserIds: Array<string>;
+    removedUserIds: Array<string>;
   };
 }
 

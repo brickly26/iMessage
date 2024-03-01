@@ -32,10 +32,9 @@ interface ConversationItemProps {
   isSelected: boolean;
   hasSeenLatestMessage: boolean | undefined;
   onDeleteConversation: (conversationId: string) => void;
-  //   onEditConversation?: () => void;
-  //   hasSeenLatestMessage?: boolean;
+  onEditConversation: () => void;
   //   selectedConversationId?: string;
-  //   onLeaveConversation?: (conversation: ConversationPopulated) => void;
+  onLeaveConversation: (conversation: ConversationPopulated) => void;
 }
 
 const ConversationItem: React.FC<ConversationItemProps> = ({
@@ -46,8 +45,8 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
   hasSeenLatestMessage,
   onDeleteConversation,
   //   selectedConversationId,
-  //   onEditConversation,
-  //   onLeaveConversation,
+  onEditConversation,
+  onLeaveConversation,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -80,7 +79,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
             icon={<AiOutlineEdit fontSize={20} />}
             onClick={(event) => {
               event.stopPropagation();
-              //   onEditConversation();
+              onEditConversation();
             }}
             bg="#2d2d2d"
             _hover={{ bg: "whiteAlpha.300" }}
@@ -92,7 +91,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
               icon={<BiLogOut fontSize={20} />}
               onClick={(event) => {
                 event.stopPropagation();
-                // onLeaveConversation(conversation);
+                onLeaveConversation(conversation);
               }}
             >
               Leave

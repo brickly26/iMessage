@@ -2,7 +2,10 @@ import { Box, Button, Text } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import ConversationModal from "./Modal/Modal";
 import { useState } from "react";
-import { ConversationPopulated } from "../../../util/types";
+import {
+  ConversationPopulated,
+  ParticipantPopulated,
+} from "../../../util/types";
 import ConversationItem from "./ConversationItem";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -24,19 +27,52 @@ const ConversationList: React.FC<ConversationListProps> = ({
   conversations,
   onViewConversation,
 }) => {
+  const router = useRouter();
+  const {
+    user: { id: userId },
+  } = session;
+
+  const [editingConversation, setEditingConversation] =
+    useState<ConversationPopulated | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const onOpen = () => setIsOpen(true);
+  const onClose = () => setIsOpen(false);
+
+  /**
+   * Mutations
+   */
+  const [updateParticipants, { loading: updateParticipantsLoading }] =
+    useMutation<
+      { updateParticipants: boolean },
+      { conversationId: string; participantIds: Array<string> }
+    >(conversationOperations.Mutations.updateParticipants);
+
   const [deleteConversation] = useMutation<
     { deleteConversation: boolean },
     { conversationId: string }
   >(conversationOperations.Mutations.deleteConversation);
 
-  const onOpen = () => setIsOpen(true);
-  const onClose = () => setIsOpen(false);
+  const onLeaveConversation = async (conversation: ConversationPopulated) => {
+    const participantIds = conversation.participants
+      .filter((p) => p.user.id !== userId)
+      .map((p) => p.user.id);
 
-  const router = useRouter();
-  const {
-    user: { id: userId },
-  } = session;
+    try {
+      const { data, errors } = await updateParticipants({
+        variables: {
+          conversationId: conversation.id,
+          participantIds,
+        },
+      });
+
+      if (!data || errors) {
+        throw new Error("Failed to update participants");
+      }
+    } catch (error: any) {
+      console.log("onUpdateConversation error", error);
+      toast.error(error.message);
+    }
+  };
 
   const onDeleteConversation = async (conversationId: string) => {
     try {
@@ -62,6 +98,22 @@ const ConversationList: React.FC<ConversationListProps> = ({
     } catch (error) {
       console.log("onDeleteConversation error", error);
     }
+  };
+
+  const getUserParticipantObject = (conversation: ConversationPopulated) => {
+    return conversation.participants.find(
+      (p) => p.user.id === session.user.id
+    ) as ParticipantPopulated;
+  };
+
+  const onEditConversation = (conversation: ConversationPopulated) => {
+    setEditingConversation(conversation);
+    onOpen();
+  };
+
+  const toggleClose = () => {
+    setEditingConversation(null);
+    onClose();
   };
 
   const sortedConversations = [...conversations].sort(
@@ -108,6 +160,8 @@ const ConversationList: React.FC<ConversationListProps> = ({
             isSelected={conversation.id === router.query.conversationId}
             userId={userId}
             onDeleteConversation={onDeleteConversation}
+            onLeaveConversation={onLeaveConversation}
+            onEditConversation={() => onEditConversation(conversation)}
           />
         );
       })}

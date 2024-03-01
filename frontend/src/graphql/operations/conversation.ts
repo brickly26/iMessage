@@ -47,6 +47,17 @@ const conversationOperations = {
         deleteConversation(conversationId: $conversationId)
       }
     `,
+    updateParticipants: gql`
+      mutation UpdatedParticipants(
+        $conversationId: String!
+        $participantIds: [String]!
+      ) {
+        updateParticipants(
+          conversationIds: $conversationId
+          participantIds: $participantIds
+        )
+      }
+    `,
   },
   Subscriptions: {
     conversationCreated: gql`
@@ -62,6 +73,8 @@ const conversationOperations = {
           conversation {
             ${ConversationFields}
           }
+          addedUserIds
+          removedUserIds
         }
       }
     `,

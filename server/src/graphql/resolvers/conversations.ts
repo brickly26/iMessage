@@ -273,6 +273,13 @@ const resolvers = {
         );
 
         // publish updates
+        pubsub.publish("CONVERSATION_UPDATED", {
+          conversationUpdated: {
+            conversation: addUpdate || deleteUpdate,
+            addedUserIds: participantsToCreate,
+            remoeUserIds: participantsToDelete,
+          },
+        });
 
         return true;
       } catch (error: any) {
@@ -322,19 +329,37 @@ const resolvers = {
           context: GraphQLContext
         ) => {
           const { session } = context;
-          const {
-            conversationUpdated: {
-              conversation: { participants },
-            },
-          } = payload;
 
           if (!session?.user) {
             throw new GraphQLError("Not authorized");
           }
 
-          console.log("in conversation updated sub", participants);
+          const {
+            user: { id: userId },
+          } = session;
+          const {
+            conversationUpdated: {
+              conversation: { participants, latestMessage },
+              addedUserIds,
+              removedUserIds,
+            },
+          } = payload;
 
-          return userIsConversationParticipant(participants, session.user.id);
+          const userIsParticipant = userIsConversationParticipant(
+            participants,
+            session.user.id
+          );
+
+          const userSentLatestMessage = latestMessage?.senderId === userId;
+
+          const userIsBeingRemoved =
+            removedUserIds && !!removedUserIds.find((id) => userId);
+
+          return (
+            (userIsParticipant && !userSentLatestMessage) ||
+            userSentLatestMessage ||
+            userIsBeingRemoved
+          );
         }
       ),
     },
