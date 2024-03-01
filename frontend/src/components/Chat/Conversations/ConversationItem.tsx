@@ -16,6 +16,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import { AiOutlineEdit } from "react-icons/ai";
 import { formatUsernames } from "../../../util/functions";
 import { ConversationPopulated } from "../../../util/types";
+import { BiLogOut } from "react-icons/bi";
 
 const formatRelativeLocale = {
   lastWeek: "eeee",
@@ -86,18 +87,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
           >
             Edit
           </MenuItem>
-          <MenuItem
-            icon={<MdDeleteOutline fontSize={20} />}
-            onClick={(event) => {
-              event.stopPropagation();
-              onDeleteConversation(conversation.id);
-            }}
-            bg="#2d2d2d"
-            _hover={{ bg: "whiteAlpha.300" }}
-          >
-            Delete
-          </MenuItem>
-          {/* {conversation.participants.length > 2 ? (
+          {conversation.participants.length > 2 ? (
             <MenuItem
               icon={<BiLogOut fontSize={20} />}
               onClick={(event) => {
@@ -112,12 +102,12 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
               icon={<MdDeleteOutline fontSize={20} />}
               onClick={(event) => {
                 event.stopPropagation();
-                // onDeleteConversation(conversation.id);
+                onDeleteConversation(conversation.id);
               }}
             >
               Delete
             </MenuItem>
-          )} */}
+          )}
         </MenuList>
       </Menu>
       <Flex position="absolute" left="-6px">

@@ -15,6 +15,13 @@ const typeDefs = gql`
     deleteConversation(conversationId: String!): Boolean
   }
 
+  type Mutation {
+    updateParticipants(
+      conversationId: String!
+      participantIds: [String]!
+    ): Boolean
+  }
+
   type createConversationResponse {
     conversationId: String
   }

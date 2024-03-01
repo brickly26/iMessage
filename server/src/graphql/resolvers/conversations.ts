@@ -185,6 +185,101 @@ const resolvers = {
       }
       return true;
     },
+    updateParticipants: async (
+      _: any,
+      args: { conversationId: string; participantIds: Array<string> },
+      context: GraphQLContext
+    ): Promise<boolean> => {
+      const { session, prisma, pubsub } = context;
+      const { conversationId, participantIds } = args;
+
+      if (!session?.user) {
+        throw new GraphQLError("Not Authorized");
+      }
+
+      const {
+        user: { id: userId },
+      } = session;
+
+      try {
+        const conversation = await prisma.conversation.findUnique({
+          where: {
+            id: conversationId,
+          },
+          include: {
+            participants: true,
+          },
+        });
+
+        // Shouldnt happen but to be safe
+        if (!conversation) {
+          throw new GraphQLError("No conversation found");
+        }
+
+        const participants = conversation?.participants;
+
+        const existingParticipants = participants.map((p) => p.userId);
+
+        const participantsToDelete = existingParticipants.filter(
+          (id) => !existingParticipants.includes(id)
+        );
+
+        const participantsToCreate = participantIds.filter(
+          (id) => !existingParticipants.includes(id)
+        );
+
+        const transactionStatements = [
+          prisma.conversation.update({
+            where: {
+              id: conversationId,
+            },
+            data: {
+              participants: {
+                deleteMany: {
+                  userId: {
+                    in: participantsToDelete,
+                  },
+                  conversationId,
+                },
+              },
+            },
+            include: conversationPopulated,
+          }),
+        ];
+
+        if (participantsToCreate.length) {
+          transactionStatements.push(
+            prisma.conversation.update({
+              where: {
+                id: conversationId,
+              },
+              data: {
+                participants: {
+                  createMany: {
+                    data: participantsToCreate.map((id) => ({
+                      userId: id,
+                      hasSeenLatestMessage: true,
+                    })),
+                  },
+                },
+              },
+              include: conversationPopulated,
+            })
+          );
+        }
+
+        const [deleteUpdate, addUpdate] = await prisma.$transaction(
+          transactionStatements
+        );
+
+        // publish updates
+
+        return true;
+      } catch (error: any) {
+        console.log("updateParticipants Error", error);
+        throw new GraphQLError(error.message);
+      }
+    },
   },
   Subscription: {
     conversationCreated: {
