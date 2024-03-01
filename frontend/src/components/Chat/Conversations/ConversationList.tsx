@@ -1,4 +1,4 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Button, Text } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import ConversationModal from "./Modal/Modal";
 import { useState } from "react";
@@ -6,6 +6,9 @@ import { ConversationPopulated } from "../../../util/types";
 import ConversationItem from "./ConversationItem";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useMutation } from "@apollo/client";
+import conversationOperations from "../../../graphql/operations/conversation";
+import toast from "react-hot-toast";
 
 interface ConversationListProps {
   session: Session;
@@ -22,6 +25,10 @@ const ConversationList: React.FC<ConversationListProps> = ({
   onViewConversation,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [deleteConversation] = useMutation<
+    { deleteConversation: boolean },
+    { conversationId: string }
+  >(conversationOperations.Mutations.deleteConversation);
 
   const onOpen = () => setIsOpen(true);
   const onClose = () => setIsOpen(false);
@@ -31,8 +38,43 @@ const ConversationList: React.FC<ConversationListProps> = ({
     user: { id: userId },
   } = session;
 
+  const onDeleteConversation = async (conversationId: string) => {
+    try {
+      toast.promise(
+        deleteConversation({
+          variables: {
+            conversationId,
+          },
+          update: () => {
+            router.replace(
+              typeof process.env.NEXT_PUBLIC_BASE_URL === "string"
+                ? process.env.NEXT_PUBLIC_BASE_URL
+                : ""
+            );
+          },
+        }),
+        {
+          loading: "Deleting...",
+          success: "Conversation deleted",
+          error: "Failed to delete conversation",
+        }
+      );
+    } catch (error) {
+      console.log("onDeleteConversation error", error);
+    }
+  };
+
+  const sortedConversations = [...conversations].sort(
+    (a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf()
+  );
+
   return (
-    <Box width="100%">
+    <Box
+      width={{ base: "100%", md: "400px" }}
+      position="relative"
+      height="100%"
+      overflow="hidden"
+    >
       <Box
         py={2}
         px={4}
@@ -46,21 +88,9 @@ const ConversationList: React.FC<ConversationListProps> = ({
           Find or start a conversation
         </Text>
       </Box>
-      <Box
-        py={2}
-        px={4}
-        mb={4}
-        bg="blackAlpha.300"
-        borderRadius={4}
-        cursor="pointer"
-        onClick={() => signOut()}
-      >
-        <Text textAlign="center" color="whiteAlpha.800" fontWeight={500}>
-          sign out
-        </Text>
-      </Box>
+
       <ConversationModal isOpen={isOpen} onClose={onClose} session={session} />
-      {conversations.map((conversation) => {
+      {sortedConversations.map((conversation) => {
         const participant = conversation.participants.find(
           (p) => p.user.id === session.user.id
         );
@@ -77,9 +107,15 @@ const ConversationList: React.FC<ConversationListProps> = ({
             hasSeenLatestMessage={participant?.hasSeenLatestMessage}
             isSelected={conversation.id === router.query.conversationId}
             userId={userId}
+            onDeleteConversation={onDeleteConversation}
           />
         );
       })}
+      <Box position="absolute" bottom={0} left={0} width="100%" px={8}>
+        <Button onClick={() => signOut()} width="100%">
+          sign out
+        </Button>
+      </Box>
     </Box>
   );
 };

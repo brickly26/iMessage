@@ -4,6 +4,7 @@ import ConversationList from "./ConversationList";
 import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
 import conversationOperations from "../../../graphql/operations/conversation";
 import {
+  ConversationDeletedData,
   ConversationPopulated,
   ConversationUpdatedData,
   ConversationsData,
@@ -58,6 +59,39 @@ const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
         if (currentlyViewingConversation) {
           onViewConversation(conversationId, false);
         }
+      },
+    }
+  );
+
+  useSubscription<ConversationDeletedData>(
+    conversationOperations.Subscriptions.conversationDeleted,
+    {
+      onData: ({ client, data }) => {
+        const { data: subscriptionData } = data;
+
+        if (!subscriptionData) return;
+
+        const existing = client.readQuery<ConversationsData>({
+          query: conversationOperations.Queries.conversations,
+        });
+
+        if (!existing) return;
+
+        const { conversations } = existing;
+        const {
+          conversationDeleted: { id: deletedConversationId },
+        } = subscriptionData;
+
+        client.writeQuery<ConversationsData>({
+          query: conversationOperations.Queries.conversations,
+          data: {
+            conversations: conversations.filter(
+              (conversation) => conversation.id !== deletedConversationId
+            ),
+          },
+        });
+
+        router.push("/");
       },
     }
   );
@@ -180,7 +214,7 @@ const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
 
   return (
     <Box
-      width={{ base: "100%", md: "400px" }}
+      width={{ base: "100%", md: "430px" }}
       display={{ base: conversationId ? "none" : "flex", md: "flex" }}
       bg="whiteAlpha.50"
       flexDirection="column"

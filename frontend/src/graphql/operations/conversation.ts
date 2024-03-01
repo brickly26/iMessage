@@ -42,6 +42,11 @@ const conversationOperations = {
         markConversationAsRead(userId: $userId, conversationId: $conversationId)
       }
     `,
+    deleteConversation: gql`
+      mutation DeleteConversation($conversationId: String!) {
+        deleteConversation(conversationId: $conversationId)
+      }
+    `,
   },
   Subscriptions: {
     conversationCreated: gql`
@@ -57,6 +62,13 @@ const conversationOperations = {
           conversation {
             ${ConversationFields}
           }
+        }
+      }
+    `,
+    conversationDeleted: gql`
+      subscription ConversationDeleted {
+        conversationDeleted {
+          id
         }
       }
     `,
