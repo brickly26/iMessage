@@ -162,6 +162,7 @@ const resolvers = {
          * Update Clients that conversation was updated
          */
         pubsub.publish("MESSAGE_SENT", { messageSent: newMessage });
+
         pubsub.publish("CONVERSATION_UPDATED", {
           conversationUpdated: {
             conversation,
@@ -187,7 +188,6 @@ const resolvers = {
           args: { conversationId: string },
           context: GraphQLContext
         ) => {
-          console.log(payload);
           return payload.messageSent.conversationId === args.conversationId;
         }
       ),

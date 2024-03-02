@@ -28,6 +28,8 @@ const typeDefs = gql`
 
   type ConversationUpdatedSubscriptionPayload {
     conversation: Conversation
+    addedUserIds: [String]
+    removedUserIds: [String]
   }
 
   type ConversationDeletedSubscriptionPayload {

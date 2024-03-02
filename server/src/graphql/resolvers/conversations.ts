@@ -154,10 +154,9 @@ const resolvers = {
 
       try {
         /**
-         * Delete conversation and all realted entities
+         * Delete conversation and all related entities
          */
-
-        const [deleteConversation] = await prisma.$transaction([
+        const [deletedConversation] = await prisma.$transaction([
           prisma.conversation.delete({
             where: {
               id: conversationId,
@@ -177,7 +176,7 @@ const resolvers = {
         ]);
 
         pubsub.publish("CONVERSATION_DELETED", {
-          conversationDeleted: deleteConversation,
+          conversationDeleted: deletedConversation,
         });
       } catch (error: any) {
         console.log("DeleteConversation error", error);
@@ -367,7 +366,7 @@ const resolvers = {
       subscribe: withFilter(
         (_: any, __: any, context: GraphQLContext) => {
           const { pubsub } = context;
-          return pubsub.asyncIterator(["CONVERSATION_UPDATED"]);
+          return pubsub.asyncIterator(["CONVERSATION_DELETED"]);
         },
         (
           payload: ConversationDeletedSubscriptionPayload,

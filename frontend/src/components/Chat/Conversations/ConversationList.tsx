@@ -141,7 +141,15 @@ const ConversationList: React.FC<ConversationListProps> = ({
         </Text>
       </Box>
 
-      <ConversationModal isOpen={isOpen} onClose={onClose} session={session} />
+      <ConversationModal
+        isOpen={isOpen}
+        onClose={onClose}
+        session={session}
+        conversations={conversations}
+        editingConversation={editingConversation}
+        getUserParticipantObject={getUserParticipantObject}
+        onViewConversation={onViewConversation}
+      />
       {sortedConversations.map((conversation) => {
         const participant = conversation.participants.find(
           (p) => p.user.id === session.user.id
