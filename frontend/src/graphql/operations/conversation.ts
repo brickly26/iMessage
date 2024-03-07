@@ -53,7 +53,7 @@ const conversationOperations = {
         $participantIds: [String]!
       ) {
         updateParticipants(
-          conversationIds: $conversationId
+          conversationId: $conversationId
           participantIds: $participantIds
         )
       }

@@ -65,6 +65,8 @@ const ConversationList: React.FC<ConversationListProps> = ({
         },
       });
 
+      console.log("leaving", errors, data);
+
       if (!data || errors) {
         throw new Error("Failed to update participants");
       }

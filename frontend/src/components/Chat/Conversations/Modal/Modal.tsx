@@ -83,7 +83,7 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
 
   const [updateParticipants, { loading: updateParticipantsLoading }] =
     useMutation<
-      { updatedParticipants: boolean },
+      { updateParticipants: boolean },
       { conversationId: string; participantIds: Array<string> }
     >(conversationOperations.Mutations.updateParticipants);
 
@@ -191,7 +191,7 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
         },
       });
 
-      if (!data?.updatedParticipants || errors) {
+      if (!data?.updateParticipants || errors) {
         throw new Error("Failed to update participants");
       }
 

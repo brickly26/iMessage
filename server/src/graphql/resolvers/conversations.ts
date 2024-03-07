@@ -220,7 +220,7 @@ const resolvers = {
         const existingParticipants = participants.map((p) => p.userId);
 
         const participantsToDelete = existingParticipants.filter(
-          (id) => !existingParticipants.includes(id)
+          (id) => !participantIds.includes(id)
         );
 
         const participantsToCreate = participantIds.filter(
@@ -257,7 +257,7 @@ const resolvers = {
                   createMany: {
                     data: participantsToCreate.map((id) => ({
                       userId: id,
-                      hasSeenLatestMessage: true,
+                      hasSeenLatestMessage: false,
                     })),
                   },
                 },
@@ -276,7 +276,7 @@ const resolvers = {
           conversationUpdated: {
             conversation: addUpdate || deleteUpdate,
             addedUserIds: participantsToCreate,
-            remoeUserIds: participantsToDelete,
+            removedUserIds: participantsToDelete,
           },
         });
 

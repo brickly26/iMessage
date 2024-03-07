@@ -66,6 +66,8 @@ const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
         /**
          * Check if user is being removed
          */
+
+        console.log("in here", removedUserIds);
         if (removedUserIds && removedUserIds.length) {
           const isBeingRemoved = removedUserIds.find((id) => id === userId);
 
