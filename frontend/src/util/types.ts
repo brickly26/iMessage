@@ -87,6 +87,26 @@ export interface CreateConversationVariables {
   participantIds: Array<string>;
 }
 
+export interface ConversationUpdatedData {
+  conversationUpdated: {
+    // conversation: Omit<
+    //   ConversationPopulated,
+    //   "latestMessage" & {
+    //     latestMessage: MessagePopulated;
+    //   }
+    // >;
+    conversation: ConversationPopulated;
+    addedUserIds: Array<string> | null;
+    removedUserIds: Array<string> | null;
+  };
+}
+
+export interface ConversationDeletedData {
+  conversationDeleted: {
+    id: string;
+  };
+}
+
 /**
  * Messages
  */
