@@ -9,6 +9,7 @@ import {
 import { Prisma } from "@prisma/client";
 import { withFilter } from "graphql-subscriptions";
 import { userIsConversationParticipant } from "../../util/functions";
+import { ObjectID } from "bson";
 
 const resolvers = {
   Query: {
@@ -152,11 +153,21 @@ const resolvers = {
         throw new GraphQLError("Not authorized");
       }
 
+      const tempConvoId = new ObjectID().toString();
+
       try {
         /**
          * Delete conversation and all related entities
          */
-        const [deletedConversation] = await prisma.$transaction([
+        const [_, deletedConversation] = await prisma.$transaction([
+          prisma.message.updateMany({
+            where: {
+              conversationId,
+            },
+            data: {
+              conversationId: tempConvoId,
+            },
+          }),
           prisma.conversation.delete({
             where: {
               id: conversationId,
@@ -170,7 +181,7 @@ const resolvers = {
           }),
           prisma.message.deleteMany({
             where: {
-              conversationId,
+              conversationId: tempConvoId,
             },
           }),
         ]);

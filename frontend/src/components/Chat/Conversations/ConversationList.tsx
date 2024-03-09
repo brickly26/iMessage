@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { useMutation } from "@apollo/client";
 import conversationOperations from "../../../graphql/operations/conversation";
 import toast from "react-hot-toast";
+import { ConversationParticipant } from "@prisma/client";
 
 interface ConversationListProps {
   session: Session;
@@ -154,7 +155,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
       />
       {sortedConversations.map((conversation) => {
         const participant = conversation.participants.find(
-          (p) => p.user.id === session.user.id
+          (p: ConversationParticipant) => p.userId === session.user.id
         );
         return (
           <ConversationItem

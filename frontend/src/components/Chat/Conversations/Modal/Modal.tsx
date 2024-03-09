@@ -232,7 +232,7 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
       getUserParticipantObject(existingConversation);
 
     onViewConversation(existingConversation.id, hasSeenLatestMessage);
-    onClose;
+    onClose();
   };
 
   /**

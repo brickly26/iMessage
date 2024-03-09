@@ -57,6 +57,14 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model FriendRequest {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  sender     User           @relation(fields: [senderId], references: [id])
+  senderId   String         @db.ObjectId
+  reciever   User           @relation(fields: [recieverId], references: [id])
+  recieverId String         @db.ObjectId
+}
+
 model Conversation {
   id                String                      @id @default(auto()) @map("_id") @db.ObjectId
   participants      ConversationParticipant[]
