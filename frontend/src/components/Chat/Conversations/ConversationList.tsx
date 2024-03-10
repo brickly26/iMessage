@@ -1,6 +1,6 @@
-import { Box, Button, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, IconButton, Text } from "@chakra-ui/react";
 import { Session } from "next-auth";
-import ConversationModal from "./Modal/Modal";
+import ConversationModal from "./Modal/ConversationModal";
 import { useState } from "react";
 import {
   ConversationPopulated,
@@ -12,7 +12,9 @@ import { useRouter } from "next/router";
 import { useMutation } from "@apollo/client";
 import conversationOperations from "../../../graphql/operations/conversation";
 import toast from "react-hot-toast";
-import { ConversationParticipant } from "@prisma/client";
+import { HiOutlineUsers } from "react-icons/hi";
+import { IoPersonAddOutline } from "react-icons/io5";
+import FriendModal from "./Modal/FriendModal";
 
 interface ConversationListProps {
   session: Session;
@@ -35,9 +37,22 @@ const ConversationList: React.FC<ConversationListProps> = ({
 
   const [editingConversation, setEditingConversation] =
     useState<ConversationPopulated | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const onOpen = () => setIsOpen(true);
-  const onClose = () => setIsOpen(false);
+
+  const [friendModalPage, setFriendModalPage] = useState("friendList");
+  const [isOpenConvo, setIsOpenConvo] = useState(false);
+  const onOpenConvo = () => setIsOpenConvo(true);
+  const onCloseConvo = () => setIsOpenConvo(false);
+
+  const [isOpenFriend, setIsOpenFriend] = useState(false);
+  const onOpenFriendList = () => {
+    setFriendModalPage("friendList");
+    setIsOpenFriend(true);
+  };
+  const onOpenFriendRequest = () => {
+    setFriendModalPage("friendRequest");
+    setIsOpenFriend(true);
+  };
+  const toggleCloseFriend = () => setIsOpenFriend(false);
 
   /**
    * Mutations
@@ -114,9 +129,9 @@ const ConversationList: React.FC<ConversationListProps> = ({
     onOpen();
   };
 
-  const toggleClose = () => {
+  const toggleCloseConvo = () => {
     setEditingConversation(null);
-    onClose();
+    onCloseConvo();
   };
 
   const sortedConversations = [...conversations].sort(
@@ -130,6 +145,20 @@ const ConversationList: React.FC<ConversationListProps> = ({
       height="100%"
       overflow="hidden"
     >
+      <Flex mb={4} justify="space-between">
+        <IconButton
+          bg="blackAlpha.300"
+          aria-label="Friends"
+          icon={<HiOutlineUsers />}
+          onClick={onOpenFriendList}
+        />
+        <IconButton
+          bg="blackAlpha.300"
+          aria-label="Friends"
+          icon={<IoPersonAddOutline />}
+          onClick={onOpenFriendRequest}
+        />
+      </Flex>
       <Box
         py={2}
         px={4}
@@ -137,16 +166,23 @@ const ConversationList: React.FC<ConversationListProps> = ({
         bg="blackAlpha.300"
         borderRadius={4}
         cursor="pointer"
-        onClick={onOpen}
+        onClick={onOpenConvo}
       >
         <Text textAlign="center" color="whiteAlpha.800" fontWeight={500}>
           Find or start a conversation
         </Text>
       </Box>
 
+      <FriendModal
+        isOpen={isOpenFriend}
+        onClose={toggleCloseFriend}
+        session={session}
+        friendModalPage={friendModalPage}
+      />
+
       <ConversationModal
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isOpenConvo}
+        onClose={toggleCloseConvo}
         session={session}
         conversations={conversations}
         editingConversation={editingConversation}
@@ -155,7 +191,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
       />
       {sortedConversations.map((conversation) => {
         const participant = conversation.participants.find(
-          (p: ConversationParticipant) => p.userId === session.user.id
+          (p) => p.userId === session.user.id
         );
         return (
           <ConversationItem
