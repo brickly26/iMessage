@@ -24,6 +24,10 @@ const typeDefs = gql`
     createUsername(username: String): CreateUsernameResponse
   }
 
+  type Mutation {
+    sendFriendRequest(userId: String!): Boolean
+  }
+
   type CreateUsernameResponse {
     success: Boolean
     error: String
