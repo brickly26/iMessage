@@ -37,14 +37,25 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  emailVerified: boolean;
   image: string;
-  name: string;
+  canSendRequest: boolean;
+}
+
+export interface Friend {
+  id: string;
+  username: string;
+  email: string;
+  image: string;
 }
 
 export interface CreateUsernameResponse {
   success?: boolean;
   error?: string;
+}
+
+export interface FriendRequest {
+  id: string;
+  status: string;
 }
 
 /**

@@ -38,18 +38,18 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const [editingConversation, setEditingConversation] =
     useState<ConversationPopulated | null>(null);
 
-  const [friendModalPage, setFriendModalPage] = useState("friendList");
+  const [friendModalPage, setFriendModalPage] = useState("friendRequests");
   const [isOpenConvo, setIsOpenConvo] = useState(false);
   const onOpenConvo = () => setIsOpenConvo(true);
   const onCloseConvo = () => setIsOpenConvo(false);
 
   const [isOpenFriend, setIsOpenFriend] = useState(false);
-  const onOpenFriendList = () => {
-    setFriendModalPage("friendList");
+  const onOpenFriendRequests = () => {
+    setFriendModalPage("friendRequests");
     setIsOpenFriend(true);
   };
-  const onOpenFriendRequest = () => {
-    setFriendModalPage("friendRequest");
+  const onOpenAddFriend = () => {
+    setFriendModalPage("addFriend");
     setIsOpenFriend(true);
   };
   const toggleCloseFriend = () => setIsOpenFriend(false);
@@ -150,13 +150,13 @@ const ConversationList: React.FC<ConversationListProps> = ({
           bg="blackAlpha.300"
           aria-label="Friends"
           icon={<HiOutlineUsers />}
-          onClick={onOpenFriendList}
+          onClick={onOpenFriendRequests}
         />
         <IconButton
           bg="blackAlpha.300"
           aria-label="Friends"
           icon={<IoPersonAddOutline />}
-          onClick={onOpenFriendRequest}
+          onClick={onOpenAddFriend}
         />
       </Flex>
       <Box
