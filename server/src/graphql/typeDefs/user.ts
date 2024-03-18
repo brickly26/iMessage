@@ -5,7 +5,7 @@ const typeDefs = gql`
     id: String
     username: String
     image: String
-    canSendRequest: Boolean
+    friendshipStatus: String
   }
 
   # type FriendRequest {

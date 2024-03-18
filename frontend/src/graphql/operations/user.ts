@@ -8,6 +8,7 @@ const userOperations = {
           id
           username
           image
+          friendshipStatus
         }
       }
     `,
@@ -19,6 +20,11 @@ const userOperations = {
           success
           error
         }
+      }
+    `,
+    sendFriendRequest: gql`
+      mutation sendFriendRequest($userId: String!) {
+        sendFriendRequest(userId: $userId)
       }
     `,
   },

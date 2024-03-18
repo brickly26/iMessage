@@ -15,6 +15,7 @@ import UserSearchList from "./UserSearchList";
 import toast from "react-hot-toast";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
+import AddFriend from "./AddFriend";
 
 interface FriendModalProps {
   session: Session;
@@ -243,30 +244,12 @@ const FriendModal: React.FC<FriendModalProps> = ({
       <ModalOverlay />
       <ModalContent bg="#2d2d2d" pb={4}>
         <ModalHeader>
-          {friendModalPage === "friendList" ? "Friend List" : "Add Friend"}
+          {friendModalPage === "friendRequests"
+            ? "Friend Requests"
+            : "Add Friend"}
         </ModalHeader>
         <ModalCloseButton />
-        <ModalBody>
-          <form onSubmit={() => {}}>
-            <Stack spacing={4}>
-              <Input
-                placeholder="Enter a username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-              />
-              <Button type="submit" disabled={!username}>
-                Search
-              </Button>
-            </Stack>
-          </form>
-          {/* {searchedUsersData?.searchUsers && (
-            <UserSearchList
-              users={searchedUsersData?.searchUsers}
-              addParticipant={addParticipant}
-              participants={participants}
-            />
-          )} */}
-        </ModalBody>
+        {friendModalPage === "addFriend" && <AddFriend session={session} />}
       </ModalContent>
     </Modal>
   );

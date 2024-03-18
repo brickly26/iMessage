@@ -60,12 +60,7 @@ export interface SearchedUser {
   id: string;
   username: string;
   image: string;
-  sentRequests: Array<FriendRequest>;
-}
-
-export interface FriendRequest {
-  id: string;
-  status: string;
+  friendshipStatus: string;
 }
 
 /**

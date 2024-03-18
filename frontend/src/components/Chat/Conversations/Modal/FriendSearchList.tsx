@@ -3,12 +3,14 @@ import { SearchedUser } from "../../../../util/types";
 
 interface UserSearchListProps {
   users: Array<SearchedUser>;
-  sendRequest: (recieverId: string) => void;
+  addParticipant: (user: SearchedUser) => void;
+  participants: Array<SearchedUser>;
 }
 
 const UserSearchList: React.FC<UserSearchListProps> = ({
   users,
-  sendRequest,
+  addParticipant,
+  participants,
 }) => {
   return (
     <>
@@ -35,13 +37,14 @@ const UserSearchList: React.FC<UserSearchListProps> = ({
                 <Button
                   bg="brand.100"
                   _hover={{ bg: "brand.100" }}
-                  isDisabled={user.friendshipStatus !== "SENDABLE"}
-                  onClick={() => sendRequest(user.id)}
+                  isDisabled={
+                    !!participants.find(
+                      (participant) => participant.id === user.id
+                    )
+                  }
+                  onClick={() => addParticipant(user)}
                 >
-                  {user.friendshipStatus == "SENDABLE" && "+ Add"}
-                  {user.friendshipStatus == "ACCEPTED" && "Friends"}
-                  {user.friendshipStatus == "DECLINED" && "Pending..."}
-                  {user.friendshipStatus == "PENDING" && "Pending..."}
+                  Select
                 </Button>
               </Flex>
             </Stack>

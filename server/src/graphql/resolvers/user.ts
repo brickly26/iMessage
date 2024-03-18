@@ -41,18 +41,24 @@ const resolvers = {
           },
         });
 
-        const requestHash: Record<string, boolean> = sentRequests.reduce(
-          (user: Record<string, boolean>, request) => {
-            user[request.recieverId] = true;
+        const requestHash: Record<string, string> = sentRequests.reduce(
+          (user: Record<string, string>, request) => {
+            user[request.recieverId] = request.status;
             return user;
           },
           {}
         );
 
+        console.log(requestHash);
+
         const users = searchedUsers.map((user) => ({
           ...user,
-          canSendRequest: !requestHash[user.id],
+          friendshipStatus: requestHash[user.id]
+            ? requestHash[user.id]
+            : "SENDABLE",
         }));
+
+        console.log(users);
 
         return users;
       } catch (error: any) {
