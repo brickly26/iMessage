@@ -14,7 +14,7 @@ import conversationOperations from "../../../graphql/operations/conversation";
 import toast from "react-hot-toast";
 import { HiOutlineUsers } from "react-icons/hi";
 import { IoPersonAddOutline } from "react-icons/io5";
-import FriendModal from "./Modal/FriendModal";
+import AddFriendModal from "./Modal/AddFriendModal";
 
 interface ConversationListProps {
   session: Session;
@@ -38,21 +38,17 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const [editingConversation, setEditingConversation] =
     useState<ConversationPopulated | null>(null);
 
-  const [friendModalPage, setFriendModalPage] = useState("friendRequests");
   const [isOpenConvo, setIsOpenConvo] = useState(false);
   const onOpenConvo = () => setIsOpenConvo(true);
   const onCloseConvo = () => setIsOpenConvo(false);
 
-  const [isOpenFriend, setIsOpenFriend] = useState(false);
-  const onOpenFriendRequests = () => {
-    setFriendModalPage("friendRequests");
-    setIsOpenFriend(true);
-  };
-  const onOpenAddFriend = () => {
-    setFriendModalPage("addFriend");
-    setIsOpenFriend(true);
-  };
-  const toggleCloseFriend = () => setIsOpenFriend(false);
+  const [isOpenFriendRequest, setIsOpenFriendRequest] = useState(false);
+  const onOpenFriendRequests = () => setIsOpenFriendRequest(true);
+  const onCloseFriendRequests = () => setIsOpenFriendRequest(false);
+
+  const [isOpenAddFriend, setIsOpenAddFriend] = useState(false);
+  const onOpenAddFriend = () => setIsOpenAddFriend(true);
+  const onCloseAddFriend = () => setIsOpenAddFriend(false);
 
   /**
    * Mutations
@@ -173,11 +169,10 @@ const ConversationList: React.FC<ConversationListProps> = ({
         </Text>
       </Box>
 
-      <FriendModal
-        isOpen={isOpenFriend}
-        onClose={toggleCloseFriend}
+      <AddFriendModal
+        isOpen={isOpenAddFriend}
+        onClose={onCloseAddFriend}
         session={session}
-        friendModalPage={friendModalPage}
       />
 
       <ConversationModal

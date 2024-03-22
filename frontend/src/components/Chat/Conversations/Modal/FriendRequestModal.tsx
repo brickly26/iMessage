@@ -1,22 +1,35 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Button, ModalBody, Stack, Input } from "@chakra-ui/react";
+import {
+  Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalCloseButton,
+  ModalBody,
+  ModalHeader,
+  Stack,
+  Input,
+} from "@chakra-ui/react";
 import { useState } from "react";
 import UserSearchList from "./UserSearchList";
 import toast from "react-hot-toast";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
-import userOperations from "../../../../graphql/operations/user";
-import {
-  SearchUsersData,
-  SearchUsersVariables,
-  SearchedUser,
-} from "../../../../util/types";
+import AddFriend from "./AddFriend";
 
-interface AddFriendProps {
+interface FriendModalProps {
   session: Session;
+  isOpen: boolean;
+  onClose: () => void;
+  friendModalPage: string;
 }
 
-const AddFriend: React.FC<AddFriendProps> = ({ session }) => {
+const FriendModal: React.FC<FriendModalProps> = ({
+  session,
+  isOpen,
+  onClose,
+  friendModalPage,
+}) => {
   const [username, setUsername] = useState("");
 
   const {
@@ -95,27 +108,19 @@ const AddFriend: React.FC<AddFriendProps> = ({ session }) => {
   };
 
   return (
-    <ModalBody>
-      <form onSubmit={onSearch}>
-        <Stack spacing={4}>
-          <Input
-            placeholder="Enter a username"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-          />
-          <Button type="submit" disabled={!username}>
-            Search
-          </Button>
-        </Stack>
-      </form>
-      {searchedUsersData?.searchUsers && (
-        <UserSearchList
-          users={searchedUsersData?.searchUsers}
-          sendRequest={onSendRequest}
-        />
-      )}
-    </ModalBody>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent bg="#2d2d2d" pb={4}>
+        <ModalHeader>
+          {friendModalPage === "friendRequests"
+            ? "Friend Requests"
+            : "Add Friend"}
+        </ModalHeader>
+        <ModalCloseButton />
+        {friendModalPage === "addFriend" && <AddFriend session={session} />}
+      </ModalContent>
+    </Modal>
   );
 };
 
-export default AddFriend;
+export default FriendModal;

@@ -40,8 +40,8 @@ const UserSearchList: React.FC<UserSearchListProps> = ({
                 >
                   {user.friendshipStatus == "SENDABLE" && "+ Add"}
                   {user.friendshipStatus == "ACCEPTED" && "Friends"}
-                  {user.friendshipStatus == "DECLINED" && "Pending..."}
-                  {user.friendshipStatus == "PENDING" && "Pending..."}
+                  {user.friendshipStatus == "DECLINED" && "Already Sent"}
+                  {user.friendshipStatus == "PENDING" && "Already Sent"}
                 </Button>
               </Flex>
             </Stack>

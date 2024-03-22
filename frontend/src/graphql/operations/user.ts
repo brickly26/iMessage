@@ -1,5 +1,16 @@
 import { gql } from "@apollo/client";
 
+const friendRequestFields = `
+  id
+  status
+  receiverId
+  sender {
+    id
+    username
+    image
+  }
+`;
+
 const userOperations = {
   Queries: {
     searchUsers: gql`
@@ -9,6 +20,13 @@ const userOperations = {
           username
           image
           friendshipStatus
+        }
+      }
+    `,
+    friendRequests: gql`
+      query friendRequests {
+        friendRequest {
+          ${friendRequestFields}
         }
       }
     `,
@@ -23,12 +41,23 @@ const userOperations = {
       }
     `,
     sendFriendRequest: gql`
-      mutation sendFriendRequest($userId: String!) {
+      mutation SendFriendRequest($userId: String!) {
         sendFriendRequest(userId: $userId)
       }
     `,
   },
-  Subscriptions: {},
+  Subscriptions: {
+    sendFriendRequest: gql`
+      subscription SendFriendRequets {
+        friendRequestSent {
+          id
+          senderId
+          recieverId
+          status
+        }
+      }
+    `,
+  },
 };
 
 export default userOperations;

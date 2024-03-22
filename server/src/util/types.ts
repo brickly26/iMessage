@@ -7,6 +7,7 @@ import {
 } from "../graphql/resolvers/conversations";
 import { Context } from "graphql-ws/lib/server";
 import { PubSub } from "graphql-subscriptions";
+import { friendRequestPopulated } from "../graphql/resolvers/user";
 
 /**
  * Server Configuration
@@ -55,7 +56,17 @@ export interface CreateUsernameResponse {
 
 export interface FriendRequest {
   id: string;
+  senderId: string;
+  receiverId: string;
   status: string;
+}
+
+export type FriendRequestPopulated = Prisma.FriendRequestGetPayload<{
+  select: typeof friendRequestPopulated;
+}>;
+
+export interface FriendRequestSentSubscriptionPayload {
+  friendRequestSent: FriendRequestPopulated;
 }
 
 /**

@@ -8,10 +8,13 @@ const typeDefs = gql`
     friendshipStatus: String
   }
 
-  # type FriendRequest {
-  #   id: String
-  #   status: String
-  # }
+  type FriendRequest {
+    id: String
+    senderId: String
+    receiverId: String
+    status: String
+    sender: User
+  }
 
   type SearchedFriend {
     id: String
@@ -28,7 +31,7 @@ const typeDefs = gql`
   }
 
   type Query {
-    friendRequests: [User]
+    friendRequests: [FriendRequest]
   }
 
   type Mutation {
@@ -50,6 +53,10 @@ const typeDefs = gql`
   type CreateUsernameResponse {
     success: Boolean
     error: String
+  }
+
+  type Subscription {
+    sendFriendRequest: FriendRequest
   }
 `;
 

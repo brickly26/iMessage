@@ -1,7 +1,13 @@
 import { GraphQLError } from "graphql";
-import { CreateUsernameResponse, GraphQLContext } from "../../util/types";
+import {
+  CreateUsernameResponse,
+  FriendRequestPopulated,
+  FriendRequestSentSubscriptionPayload,
+  GraphQLContext,
+} from "../../util/types";
 import { $Enums, Prisma, PrismaClient, User } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
+import { withFilter } from "graphql-subscriptions";
 
 const resolvers = {
   Query: {
@@ -102,6 +108,44 @@ const resolvers = {
         throw new GraphQLError(error?.message);
       }
     },
+    friendRequests: async (
+      _: any,
+      __: any,
+      context: GraphQLContext
+    ): Promise<Array<FriendRequestPopulated>> => {
+      const { prisma, session } = context;
+
+      if (!session?.user) {
+        throw new GraphQLError("Not authorized");
+      }
+
+      const {
+        user: { id: userId },
+      } = session;
+
+      try {
+        const user = await prisma.user.findUnique({
+          where: {
+            id: userId,
+          },
+          include: {
+            recievedRequests: {
+              select: friendRequestPopulated,
+            },
+          },
+        });
+
+        // Shouldnt happend but still
+        if (!user) {
+          throw new GraphQLError("User doesnt exits");
+        }
+
+        return user?.recievedRequests;
+      } catch (error: any) {
+        console.log("searchFriends Error", error);
+        throw new GraphQLError(error?.message);
+      }
+    },
   },
   Mutation: {
     createUsername: async (
@@ -175,7 +219,7 @@ const resolvers = {
           },
           include: {
             sentRequests: true,
-            receivedRequests: true,
+            recievedRequests: true,
             friends: true,
           },
         });
@@ -196,13 +240,13 @@ const resolvers = {
           throw new GraphQLError("You've already sent this user a request");
         }
 
-        const alreadyRecievedRequestFromUser = sender?.receivedRequests.find(
+        const alreadyRecievedRequestFromUser = sender?.recievedRequests.find(
           (request) => request.senderId === senderId
         );
 
         if (alreadyRecievedRequestFromUser) {
           // Add friend to both users and update friend request status to accepted
-          await prisma.$transaction([
+          const [_, __, friendRequest] = await prisma.$transaction([
             prisma.user.update({
               where: {
                 id: senderId,
@@ -244,12 +288,22 @@ const resolvers = {
               data: {
                 status: "ACCEPTED",
               },
+              include: {
+                sender: true,
+              },
             }),
           ]);
+
+          pubsub.publish("SEND_FRIEND_REQUEST", {
+            friendRequestSent: friendRequest,
+          });
+
+          console.log(friendRequest);
+
           return true;
         }
 
-        await prisma.friendRequest.create({
+        const friendRequest = await prisma.friendRequest.create({
           data: {
             senderId,
             recieverId: userId,
@@ -257,7 +311,12 @@ const resolvers = {
           },
         });
 
+        console.log(friendRequest);
+
         // Publish friend request user real-time
+        pubsub.publish("SEND_FRIEND_REQUEST", {
+          friendRequestSent: friendRequest,
+        });
 
         return true;
       } catch (error: any) {
@@ -270,7 +329,7 @@ const resolvers = {
       args: { requestId: string; choice: string },
       context: GraphQLContext
     ): Promise<boolean> => {
-      const { session, prisma } = context;
+      const { session, prisma, pubsub } = context;
       const { requestId, choice } = args;
 
       if (!session?.user) {
@@ -351,8 +410,6 @@ const resolvers = {
               },
             })
           );
-
-          // pubsub send out that we accepted friend request
         }
 
         await prisma.$transaction(prismaTransactionArray);
@@ -364,6 +421,47 @@ const resolvers = {
       }
     },
   },
+  Subscription: {
+    sendFriendRequest: {
+      subscribe: withFilter(
+        (_: any, __: any, context: GraphQLContext) => {
+          const { pubsub } = context;
+          return pubsub.asyncIterator(["SEND_FRIEND_REQUEST"]);
+        },
+        (
+          payload: FriendRequestSentSubscriptionPayload,
+          _: any,
+          context: GraphQLContext
+        ) => {
+          const { session } = context;
+
+          if (!session?.user) {
+            throw new GraphQLError("Not Authorized");
+          }
+
+          const { id: userId } = session.user;
+          const { senderId, recieverId } = payload.friendRequestSent;
+
+          return userId === senderId || userId === recieverId;
+        }
+      ),
+    },
+  },
 };
+
+export const friendRequestPopulated =
+  Prisma.validator<Prisma.FriendRequestSelect>()({
+    status: true,
+    id: true,
+    senderId: true,
+    recieverId: true,
+    sender: {
+      select: {
+        id: true,
+        username: true,
+        image: true,
+      },
+    },
+  });
 
 export default resolvers;

@@ -56,7 +56,7 @@ model User {
   accounts         Account[]
   sessions         Session[]
   sentRequests     FriendRequest[]           @relation(name: "sentRequests")
-  receivedRequests FriendRequest[]           @relation(name: "receivedRequests")
+  recievedRequests FriendRequest[]           @relation(name: "receivedRequests")
   friends          User[]                    @relation("Friends", fields: [friendIds], references: [id])
   friendIds        String[]                  @db.ObjectId
   friendsWith      User[]                    @relation("Friends", fields: [friendsWithIds], references: [id])
