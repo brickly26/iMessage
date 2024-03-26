@@ -1,20 +1,23 @@
 import { Box, Button, Flex, IconButton, Text } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import ConversationModal from "./Modal/ConversationModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ConversationPopulated,
+  FriendRequestsData,
   ParticipantPopulated,
 } from "../../../util/types";
 import ConversationItem from "./ConversationItem";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import conversationOperations from "../../../graphql/operations/conversation";
 import toast from "react-hot-toast";
 import { HiOutlineUsers } from "react-icons/hi";
 import { IoPersonAddOutline } from "react-icons/io5";
 import AddFriendModal from "./Modal/AddFriendModal";
+import FriendRequestModal from "./Modal/FriendRequestModal";
+import userOperations from "../../../graphql/operations/user";
 
 interface ConversationListProps {
   session: Session;
@@ -51,6 +54,17 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const onCloseAddFriend = () => setIsOpenAddFriend(false);
 
   /**
+   * Queries
+   */
+  const {
+    data: friendRequestsData,
+    error,
+    loading,
+  } = useQuery<FriendRequestsData>(userOperations.Queries.friendRequests);
+
+  console.log("friendRequestData", friendRequestsData);
+
+  /**
    * Mutations
    */
   const [updateParticipants, { loading: updateParticipantsLoading }] =
@@ -76,8 +90,6 @@ const ConversationList: React.FC<ConversationListProps> = ({
           participantIds,
         },
       });
-
-      console.log("leaving", errors, data);
 
       if (!data || errors) {
         throw new Error("Failed to update participants");
@@ -174,6 +186,14 @@ const ConversationList: React.FC<ConversationListProps> = ({
         onClose={onCloseAddFriend}
         session={session}
       />
+
+      {friendRequestsData && (
+        <FriendRequestModal
+          isOpen={isOpenFriendRequest}
+          onClose={onCloseFriendRequests}
+          friendRequests={friendRequestsData.friendRequests}
+        />
+      )}
 
       <ConversationModal
         isOpen={isOpenConvo}

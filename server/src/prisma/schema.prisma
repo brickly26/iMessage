@@ -64,12 +64,14 @@ model User {
 }
 
 model FriendRequest {
-  id         String        @id @default(auto()) @map("_id") @db.ObjectId
-  status     RequestStatus
-  sender     User          @relation(name: "sentRequests", fields: [senderId], references: [id])
-  senderId   String        @db.ObjectId
-  reciever   User          @relation(name: "receivedRequests", fields: [recieverId], references: [id])
-  recieverId String        @db.ObjectId
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  status        RequestStatus
+  sender        User          @relation(name: "sentRequests", fields: [senderId], references: [id])
+  senderId      String        @db.ObjectId
+  reciever      User          @relation(name: "receivedRequests", fields: [recieverId], references: [id])
+  recieverId    String        @db.ObjectId
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 enum RequestStatus {

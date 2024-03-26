@@ -63,6 +63,30 @@ export interface SearchedUser {
   friendshipStatus: string;
 }
 
+export interface FriendRequest {
+  id: string;
+  status: string;
+  createdAt: string;
+  senderId: string;
+  sender: {
+    id: string;
+    username: string;
+    image: string;
+  };
+}
+
+export interface FriendRequestsData {
+  friendRequests: Array<FriendRequest>;
+}
+
+export interface FriendRequestSentSubscriptionData {
+  subscriptionData: {
+    data: {
+      friendRequestSent: FriendRequest;
+    };
+  };
+}
+
 /**
  * CONVERSATION TYPES
  */
@@ -140,5 +164,11 @@ export interface MessageSubscriptionData {
     data: {
       messageSent: MessagePopulated;
     };
+  };
+}
+
+export interface searchUsersSubscriptionData {
+  subscriptionData: {
+    data: {};
   };
 }

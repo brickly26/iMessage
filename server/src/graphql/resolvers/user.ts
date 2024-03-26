@@ -47,6 +47,19 @@ const resolvers = {
           },
         });
 
+        console.log("sentRequests", sentRequests);
+
+        const recievedRequests = await prisma.friendRequest.findMany({
+          where: {
+            recieverId: userId,
+            senderId: {
+              in: searchedUsers.map((user) => user.id),
+            },
+          },
+        });
+
+        console.log("recievedRequests", recievedRequests);
+
         const requestHash: Record<string, string> = sentRequests.reduce(
           (user: Record<string, string>, request) => {
             user[request.recieverId] = request.status;
@@ -55,7 +68,11 @@ const resolvers = {
           {}
         );
 
-        console.log(requestHash);
+        recievedRequests.forEach((request) => {
+          requestHash[request.senderId] = request.status;
+        });
+
+        console.log("requesthash", requestHash);
 
         const users = searchedUsers.map((user) => ({
           ...user,
@@ -64,7 +81,7 @@ const resolvers = {
             : "SENDABLE",
         }));
 
-        console.log(users);
+        console.log("users", users);
 
         return users;
       } catch (error: any) {
@@ -213,36 +230,17 @@ const resolvers = {
       } = session;
 
       try {
-        const sender = await prisma.user.findUnique({
-          where: {
-            id: senderId,
-          },
-          include: {
-            sentRequests: true,
-            recievedRequests: true,
-            friends: true,
-          },
-        });
+        const alreadyRecievedRequestFromUser =
+          await prisma.friendRequest.findFirst({
+            where: {
+              senderId: userId,
+              recieverId: senderId,
+            },
+          });
 
-        const alreadyFriends = sender?.friends.find(
-          (friend) => friend.id === userId
-        );
-
-        if (alreadyFriends) {
+        if (alreadyRecievedRequestFromUser?.status === "ACCEPTED") {
           throw new GraphQLError("You're already friends with this user");
         }
-
-        const alreadySent = sender?.sentRequests.find(
-          (request) => request.recieverId === userId
-        );
-
-        if (alreadySent) {
-          throw new GraphQLError("You've already sent this user a request");
-        }
-
-        const alreadyRecievedRequestFromUser = sender?.recievedRequests.find(
-          (request) => request.senderId === senderId
-        );
 
         if (alreadyRecievedRequestFromUser) {
           // Add friend to both users and update friend request status to accepted
@@ -343,8 +341,7 @@ const resolvers = {
       try {
         const friendRequest = await prisma.friendRequest.findFirst({
           where: {
-            senderId: requestId,
-            recieverId: userId,
+            id: requestId,
           },
         });
 
@@ -357,62 +354,67 @@ const resolvers = {
           throw new GraphQLError("invalid choice");
         }
 
-        const prismaTransactionArray: Array<any> = [
-          prisma.friendRequest.update({
+        if (choice === "ACCEPTED") {
+          await prisma.friendRequest.update({
             where: {
               id: friendRequest.id,
             },
             data: {
               status: choice,
             },
-          }),
-        ];
+          });
 
-        if (choice === "ACCEPTED") {
           // Add user to our friendslist
-          prismaTransactionArray.push(
-            prisma.user.update({
-              where: {
-                id: userId,
-              },
-              data: {
-                friends: {
-                  connect: {
-                    id: requestId,
-                  },
-                },
-                friendsWith: {
-                  connect: {
-                    id: requestId,
-                  },
+          await prisma.user.update({
+            where: {
+              id: userId,
+            },
+            data: {
+              friends: {
+                connect: {
+                  id: friendRequest.senderId,
                 },
               },
-            })
-          );
+              friendsWith: {
+                connect: {
+                  id: friendRequest.senderId,
+                },
+              },
+            },
+          });
 
           // Add us to requesters friends list
-          prismaTransactionArray.push(
-            prisma.user.update({
-              where: {
-                id: requestId,
-              },
-              data: {
-                friends: {
-                  connect: {
+          await prisma.user.update({
+            where: {
+              id: friendRequest.senderId,
+            },
+            data: {
+              friends: {
+                connect: [
+                  {
                     id: userId,
                   },
-                },
-                friendsWith: {
-                  connect: {
+                ],
+              },
+              friendsWith: {
+                connect: [
+                  {
                     id: userId,
                   },
-                },
+                ],
               },
-            })
-          );
+            },
+          });
+        } else {
+          await prisma.friendRequest.update({
+            where: {
+              id: friendRequest.id,
+            },
+            data: {
+              status: choice,
+            },
+          });
         }
-
-        await prisma.$transaction(prismaTransactionArray);
 
         return true;
       } catch (error: any) {
@@ -455,6 +457,7 @@ export const friendRequestPopulated =
     id: true,
     senderId: true,
     recieverId: true,
+    createdAt: true,
     sender: {
       select: {
         id: true,

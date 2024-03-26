@@ -16,111 +16,80 @@ import toast from "react-hot-toast";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import AddFriend from "./AddFriend";
+import FriendRequestList from "./FriendRequestList";
+import { FriendRequest } from "../../../../util/types";
+import userOperations from "../../../../graphql/operations/user";
 
-interface FriendModalProps {
-  session: Session;
+interface FriendRequestModalProps {
+  friendRequests: Array<FriendRequest>;
   isOpen: boolean;
   onClose: () => void;
-  friendModalPage: string;
 }
 
-const FriendModal: React.FC<FriendModalProps> = ({
-  session,
+const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
+  friendRequests,
   isOpen,
   onClose,
-  friendModalPage,
 }) => {
-  const [username, setUsername] = useState("");
+  const [friendRequestLoading, setFriendRequestLoading] = useState<{
+    loading: boolean;
+    requestId: string;
+    choice: string;
+  }>({
+    loading: false,
+    requestId: "",
+    choice: "",
+  });
 
-  const {
-    user: { id: userId },
-  } = session;
+  const [handleFriendRequest] = useMutation<
+    { handleFriendRequest: boolean },
+    { requestId: string; choice: string }
+  >(userOperations.Mutation.handleFriendRequest);
 
-  const router = useRouter();
-
-  const [
-    searchUsers,
-    {
-      data: searchedUsersData,
-      loading: searchedUsersLoading,
-      error: searchedUsersError,
-    },
-  ] = useLazyQuery<SearchUsersData, SearchUsersVariables>(
-    userOperations.Queries.searchUsers
-  );
-
-  const [sendFriendRequest, { loading: sendFriendRequestLoading }] =
-    useMutation<{ sendFriendRequest: boolean }, { userId: string }>(
-      userOperations.Mutation.sendFriendRequest
-    );
-
-  const onSendRequest = (recieverId: string) => {
+  const FriendRequestHandler = async (requestId: string, choice: string) => {
+    setFriendRequestLoading({
+      loading: true,
+      requestId: requestId,
+      choice: choice,
+    });
     try {
-      // send friend request
-      sendFriendRequest({
+      const { data, errors } = await handleFriendRequest({
         variables: {
-          userId: recieverId,
-        },
-        update: (cache) => {
-          const userSearch = cache.readQuery<SearchUsersData>({
-            query: userOperations.Queries.searchUsers,
-            variables: { username },
-          });
-
-          if (!userSearch) return;
-
-          const { searchUsers: users } = userSearch;
-
-          console.log(users);
-
-          const updatedIdx = users.findIndex((user) => user.id === recieverId);
-
-          console.log(updatedIdx);
-
-          if (updatedIdx < 0) return;
-
-          const clonedUsers = structuredClone(users);
-
-          clonedUsers[updatedIdx].friendshipStatus = "PENDING";
-
-          console.log(clonedUsers);
-
-          cache.writeQuery<SearchUsersData>({
-            query: userOperations.Queries.searchUsers,
-            variables: { username },
-            data: {
-              searchUsers: clonedUsers,
-            },
-          });
+          requestId,
+          choice,
         },
       });
+
+      if (!data || errors) {
+        throw new Error("Failed to update participants");
+      }
     } catch (error: any) {
-      console.log("onSendRequest Error", error);
-      toast.error("Failed to send friend request");
+      console.log("handleFriendRequest Error", error);
+      toast.error(error.message);
+    } finally {
+      setFriendRequestLoading({
+        loading: false,
+        requestId: "",
+        choice: "",
+      });
     }
   };
-
-  const onSearch = (event: React.FormEvent) => {
-    event.preventDefault();
-
-    // search users query
-    searchUsers({ variables: { username } });
-  };
-
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent bg="#2d2d2d" pb={4}>
-        <ModalHeader>
-          {friendModalPage === "friendRequests"
-            ? "Friend Requests"
-            : "Add Friend"}
-        </ModalHeader>
+        <ModalHeader>Friend Requests</ModalHeader>
         <ModalCloseButton />
-        {friendModalPage === "addFriend" && <AddFriend session={session} />}
+        <ModalBody>
+          <FriendRequestList
+            friendRequests={friendRequests}
+            handleFriendRequest={FriendRequestHandler}
+            friendRequestLoading={friendRequestLoading}
+          />
+        </ModalBody>
       </ModalContent>
     </Modal>
   );
 };
 
-export default FriendModal;
+export default FriendRequestModal;

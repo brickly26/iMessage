@@ -10,7 +10,7 @@ import {
   Stack,
   Input,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UserSearchList from "./UserSearchList";
 import toast from "react-hot-toast";
 import { Session } from "next-auth";
@@ -35,8 +35,6 @@ const FriendModal: React.FC<FriendModalProps> = ({
     user: { id: userId },
   } = session;
 
-  const router = useRouter();
-
   const [
     searchUsers,
     {
@@ -48,6 +46,19 @@ const FriendModal: React.FC<FriendModalProps> = ({
   ] = useLazyQuery<SearchUsersData, SearchUsersVariables>(
     userOperations.Queries.searchUsers
   );
+
+  const subscribeToMoreSearchedUsers = (username: string) => {
+    subscribeToMore({
+      document: userOperations.Subscriptions.sendFriendRequest,
+      variables: { username },
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData) return prev;
+        // TODO: finish this as well as typeing subscriptiondata
+
+        return prev;
+      },
+    });
+  };
 
   const [sendFriendRequest, { loading: sendFriendRequestLoading }] =
     useMutation<{ sendFriendRequest: boolean }, { userId: string }>(
@@ -71,19 +82,13 @@ const FriendModal: React.FC<FriendModalProps> = ({
 
           const { searchUsers: users } = userSearch;
 
-          console.log(users);
-
           const updatedIdx = users.findIndex((user) => user.id === recieverId);
-
-          console.log(updatedIdx);
 
           if (updatedIdx < 0) return;
 
           const clonedUsers = structuredClone(users);
 
           clonedUsers[updatedIdx].friendshipStatus = "PENDING";
-
-          console.log(clonedUsers);
 
           cache.writeQuery<SearchUsersData>({
             query: userOperations.Queries.searchUsers,
@@ -107,15 +112,15 @@ const FriendModal: React.FC<FriendModalProps> = ({
     searchUsers({ variables: { username } });
   };
 
+  useEffect(() => {
+    subscribeToMoreSearchedUsers(username);
+  }, [username]);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent bg="#2d2d2d" pb={4}>
-        <ModalHeader>
-          {friendModalPage === "friendRequests"
-            ? "Friend Requests"
-            : "Add Friend"}
-        </ModalHeader>
+        <ModalHeader>Add Friend</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <form onSubmit={onSearch}>
