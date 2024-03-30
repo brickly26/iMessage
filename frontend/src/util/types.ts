@@ -63,11 +63,18 @@ export interface SearchedUser {
   friendshipStatus: string;
 }
 
+export interface SearchedFriend {
+  id: string;
+  username: string;
+  image: string;
+}
+
 export interface FriendRequest {
   id: string;
   status: string;
   createdAt: string;
   senderId: string;
+  receiverId: string;
   sender: {
     id: string;
     username: string;
@@ -79,12 +86,16 @@ export interface FriendRequestsData {
   friendRequests: Array<FriendRequest>;
 }
 
-export interface FriendRequestSentSubscriptionData {
-  subscriptionData: {
-    data: {
-      friendRequestSent: FriendRequest;
-    };
-  };
+export interface SendFriendRequestData {
+  sendFriendRequest: FriendRequest;
+}
+
+export interface AcceptFriendRequestData {
+  acceptFriendRequest: FriendRequest;
+}
+
+export interface DeclineFriendRequestData {
+  declineFriendRequest: FriendRequest;
 }
 
 /**
@@ -164,11 +175,5 @@ export interface MessageSubscriptionData {
     data: {
       messageSent: MessagePopulated;
     };
-  };
-}
-
-export interface searchUsersSubscriptionData {
-  subscriptionData: {
-    data: {};
   };
 }

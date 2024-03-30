@@ -3,7 +3,7 @@ import { SearchedUser } from "../../../../util/types";
 
 interface UserSearchListProps {
   users: Array<SearchedUser>;
-  sendRequest: (recieverId: string) => void;
+  sendRequest: (receiverId: string) => void;
 }
 
 const UserSearchList: React.FC<UserSearchListProps> = ({

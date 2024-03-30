@@ -29,6 +29,7 @@ import conversationOperations from "../../../../graphql/operations/conversation"
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import ConversationItem from "../ConversationItem";
+import FriendSearchList from "./FriendSearchList";
 
 interface ConversationModalProps {
   session: Session;
@@ -290,8 +291,8 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
             </Stack>
           </form>
           {searchedUsersData?.searchUsers && (
-            <UserSearchList
-              users={searchedUsersData?.searchUsers}
+            <FriendSearchList
+              friends={searchedUsersData?.searchUsers}
               addParticipant={addParticipant}
               participants={participants}
             />

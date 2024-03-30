@@ -56,7 +56,7 @@ model User {
   accounts         Account[]
   sessions         Session[]
   sentRequests     FriendRequest[]           @relation(name: "sentRequests")
-  recievedRequests FriendRequest[]           @relation(name: "receivedRequests")
+  receivedRequests FriendRequest[]           @relation(name: "receivedRequests")
   friends          User[]                    @relation("Friends", fields: [friendIds], references: [id])
   friendIds        String[]                  @db.ObjectId
   friendsWith      User[]                    @relation("Friends", fields: [friendsWithIds], references: [id])
@@ -68,8 +68,8 @@ model FriendRequest {
   status        RequestStatus
   sender        User          @relation(name: "sentRequests", fields: [senderId], references: [id])
   senderId      String        @db.ObjectId
-  reciever      User          @relation(name: "receivedRequests", fields: [recieverId], references: [id])
-  recieverId    String        @db.ObjectId
+  receiver      User          @relation(name: "receivedRequests", fields: [receiverId], references: [id])
+  receiverId    String        @db.ObjectId
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }

@@ -2,7 +2,9 @@ import { GraphQLError } from "graphql";
 import {
   CreateUsernameResponse,
   FriendRequestPopulated,
-  FriendRequestSentSubscriptionPayload,
+  SendFriendRequestSubscriptionPayload,
+  AcceptFriendRequestSubscriptionPayload,
+  DeclineFriendRequestSubscriptionPayload,
   GraphQLContext,
 } from "../../util/types";
 import { $Enums, Prisma, PrismaClient, User } from "@prisma/client";
@@ -41,7 +43,7 @@ const resolvers = {
         const sentRequests = await prisma.friendRequest.findMany({
           where: {
             senderId: userId,
-            recieverId: {
+            receiverId: {
               in: searchedUsers.map((user) => user.id),
             },
           },
@@ -49,27 +51,28 @@ const resolvers = {
 
         console.log("sentRequests", sentRequests);
 
-        const recievedRequests = await prisma.friendRequest.findMany({
+        const receivedRequests = await prisma.friendRequest.findMany({
           where: {
-            recieverId: userId,
+            receiverId: userId,
             senderId: {
               in: searchedUsers.map((user) => user.id),
             },
           },
         });
 
-        console.log("recievedRequests", recievedRequests);
+        console.log("receivedRequests", receivedRequests);
 
         const requestHash: Record<string, string> = sentRequests.reduce(
           (user: Record<string, string>, request) => {
-            user[request.recieverId] = request.status;
+            user[request.receiverId] = request.status;
             return user;
           },
           {}
         );
 
-        recievedRequests.forEach((request) => {
-          requestHash[request.senderId] = request.status;
+        receivedRequests.forEach((request) => {
+          requestHash[request.senderId] =
+            request.status !== "ACCEPTED" ? "SENDABLE" : "ACCEPTED";
         });
 
         console.log("requesthash", requestHash);
@@ -146,7 +149,7 @@ const resolvers = {
             id: userId,
           },
           include: {
-            recievedRequests: {
+            receivedRequests: {
               select: friendRequestPopulated,
             },
           },
@@ -157,7 +160,7 @@ const resolvers = {
           throw new GraphQLError("User doesnt exits");
         }
 
-        return user?.recievedRequests;
+        return user?.receivedRequests;
       } catch (error: any) {
         console.log("searchFriends Error", error);
         throw new GraphQLError(error?.message);
@@ -230,19 +233,19 @@ const resolvers = {
       } = session;
 
       try {
-        const alreadyRecievedRequestFromUser =
+        const alreadyreceivedRequestFromUser =
           await prisma.friendRequest.findFirst({
             where: {
               senderId: userId,
-              recieverId: senderId,
+              receiverId: senderId,
             },
           });
 
-        if (alreadyRecievedRequestFromUser?.status === "ACCEPTED") {
+        if (alreadyreceivedRequestFromUser?.status === "ACCEPTED") {
           throw new GraphQLError("You're already friends with this user");
         }
 
-        if (alreadyRecievedRequestFromUser) {
+        if (alreadyreceivedRequestFromUser) {
           // Add friend to both users and update friend request status to accepted
           const [_, __, friendRequest] = await prisma.$transaction([
             prisma.user.update({
@@ -281,7 +284,7 @@ const resolvers = {
             }),
             prisma.friendRequest.update({
               where: {
-                id: alreadyRecievedRequestFromUser.id,
+                id: alreadyreceivedRequestFromUser.id,
               },
               data: {
                 status: "ACCEPTED",
@@ -292,8 +295,8 @@ const resolvers = {
             }),
           ]);
 
-          pubsub.publish("SEND_FRIEND_REQUEST", {
-            friendRequestSent: friendRequest,
+          pubsub.publish("ACCEPT_FRIEND_REQUEST", {
+            acceptFriendRequest: friendRequest,
           });
 
           console.log(friendRequest);
@@ -304,8 +307,11 @@ const resolvers = {
         const friendRequest = await prisma.friendRequest.create({
           data: {
             senderId,
-            recieverId: userId,
+            receiverId: userId,
             status: "PENDING",
+          },
+          include: {
+            sender: true,
           },
         });
 
@@ -313,7 +319,7 @@ const resolvers = {
 
         // Publish friend request user real-time
         pubsub.publish("SEND_FRIEND_REQUEST", {
-          friendRequestSent: friendRequest,
+          sendFriendRequest: friendRequest,
         });
 
         return true;
@@ -355,12 +361,15 @@ const resolvers = {
         }
 
         if (choice === "ACCEPTED") {
-          await prisma.friendRequest.update({
+          const updatedFriendRequest = await prisma.friendRequest.update({
             where: {
               id: friendRequest.id,
             },
             data: {
               status: choice,
+            },
+            include: {
+              sender: true,
             },
           });
 
@@ -405,14 +414,25 @@ const resolvers = {
               },
             },
           });
+
+          pubsub.publish("ACCEPT_FRIEND_REQUEST", {
+            acceptFriendRequest: updatedFriendRequest,
+          });
         } else {
-          await prisma.friendRequest.update({
+          const updatedFriendRequest = await prisma.friendRequest.update({
             where: {
               id: friendRequest.id,
             },
             data: {
               status: choice,
             },
+            include: {
+              sender: true,
+            },
+          });
+
+          pubsub.publish("DECLINE_FRIEND_REQUEST", {
+            declineFriendRequest: updatedFriendRequest,
           });
         }
 
@@ -431,7 +451,7 @@ const resolvers = {
           return pubsub.asyncIterator(["SEND_FRIEND_REQUEST"]);
         },
         (
-          payload: FriendRequestSentSubscriptionPayload,
+          payload: SendFriendRequestSubscriptionPayload,
           _: any,
           context: GraphQLContext
         ) => {
@@ -442,9 +462,51 @@ const resolvers = {
           }
 
           const { id: userId } = session.user;
-          const { senderId, recieverId } = payload.friendRequestSent;
+          const { senderId, receiverId } = payload.sendFriendRequest;
 
-          return userId === senderId || userId === recieverId;
+          return userId === senderId || userId === receiverId;
+        }
+      ),
+    },
+    acceptFriendRequest: {
+      subscribe: withFilter(
+        (_: any, __: any, context: GraphQLContext) => {
+          const { pubsub } = context;
+          return pubsub.asyncIterator(["ACCEPT_FRIEND_REQUEST"]);
+        },
+        (
+          payload: AcceptFriendRequestSubscriptionPayload,
+          _: any,
+          context: GraphQLContext
+        ) => {
+          const { session } = context;
+          if (!session?.user) {
+            throw new GraphQLError("Not Authorized");
+          }
+          const { id: userId } = session.user;
+          const { senderId, receiverId } = payload.acceptFriendRequest;
+          return userId === senderId || userId === receiverId;
+        }
+      ),
+    },
+    declineFriendRequest: {
+      subscribe: withFilter(
+        (_: any, __: any, context: GraphQLContext) => {
+          const { pubsub } = context;
+          return pubsub.asyncIterator(["SEND_FRIEND_REQUEST"]);
+        },
+        (
+          payload: DeclineFriendRequestSubscriptionPayload,
+          _: any,
+          context: GraphQLContext
+        ) => {
+          const { session } = context;
+          if (!session?.user) {
+            throw new GraphQLError("Not Authorized");
+          }
+          const { id: userId } = session.user;
+          const { senderId, receiverId } = payload.declineFriendRequest;
+          return userId === senderId || userId === receiverId;
         }
       ),
     },
@@ -456,7 +518,7 @@ export const friendRequestPopulated =
     status: true,
     id: true,
     senderId: true,
-    recieverId: true,
+    receiverId: true,
     createdAt: true,
     sender: {
       select: {

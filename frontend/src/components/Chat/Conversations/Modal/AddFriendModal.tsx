@@ -41,36 +41,22 @@ const FriendModal: React.FC<FriendModalProps> = ({
       data: searchedUsersData,
       loading: searchedUsersLoading,
       error: searchedUsersError,
-      subscribeToMore,
     },
   ] = useLazyQuery<SearchUsersData, SearchUsersVariables>(
     userOperations.Queries.searchUsers
   );
-
-  const subscribeToMoreSearchedUsers = (username: string) => {
-    subscribeToMore({
-      document: userOperations.Subscriptions.sendFriendRequest,
-      variables: { username },
-      updateQuery: (prev, { subscriptionData }) => {
-        if (!subscriptionData) return prev;
-        // TODO: finish this as well as typeing subscriptiondata
-
-        return prev;
-      },
-    });
-  };
 
   const [sendFriendRequest, { loading: sendFriendRequestLoading }] =
     useMutation<{ sendFriendRequest: boolean }, { userId: string }>(
       userOperations.Mutation.sendFriendRequest
     );
 
-  const onSendRequest = (recieverId: string) => {
+  const onSendRequest = (receiverId: string) => {
     try {
       // send friend request
       sendFriendRequest({
         variables: {
-          userId: recieverId,
+          userId: receiverId,
         },
         update: (cache) => {
           const userSearch = cache.readQuery<SearchUsersData>({
@@ -82,7 +68,7 @@ const FriendModal: React.FC<FriendModalProps> = ({
 
           const { searchUsers: users } = userSearch;
 
-          const updatedIdx = users.findIndex((user) => user.id === recieverId);
+          const updatedIdx = users.findIndex((user) => user.id === receiverId);
 
           if (updatedIdx < 0) return;
 
@@ -112,9 +98,9 @@ const FriendModal: React.FC<FriendModalProps> = ({
     searchUsers({ variables: { username } });
   };
 
-  useEffect(() => {
-    subscribeToMoreSearchedUsers(username);
-  }, [username]);
+  // useEffect(() => {
+  //   subscribeToMoreSearchedUsers(username);
+  // }, [username]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>

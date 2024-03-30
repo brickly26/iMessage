@@ -1,12 +1,14 @@
-import { useLazyQuery, useMutation } from "@apollo/client";
+import { useLazyQuery, useMutation, useSubscription } from "@apollo/client";
 import { Button, ModalBody, Stack, Input } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UserSearchList from "./UserSearchList";
 import toast from "react-hot-toast";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import userOperations from "../../../../graphql/operations/user";
 import {
+  AcceptFriendRequestData,
+  DeclineFriendRequestData,
   SearchUsersData,
   SearchUsersVariables,
   SearchedUser,
@@ -36,17 +38,110 @@ const AddFriend: React.FC<AddFriendProps> = ({ session }) => {
     userOperations.Queries.searchUsers
   );
 
-  const [sendFriendRequest, { loading: sendFriendRequestLoading }] =
-    useMutation<{ sendFriendRequest: boolean }, { userId: string }>(
-      userOperations.Mutation.sendFriendRequest
-    );
+  /**
+   * Subscriptions
+   */
+  useSubscription<AcceptFriendRequestData>(
+    userOperations.Subscriptions.acceptFriendRequest,
+    {
+      onData: ({ client, data }) => {
+        const { data: subscriptionData } = data;
 
-  const onSendRequest = (recieverId: string) => {
+        if (!subscriptionData) return;
+
+        const {
+          acceptFriendRequest: {
+            senderId,
+            receiverId,
+            id: acceptedFriendRequestId,
+          },
+        } = subscriptionData;
+
+        const existing = client.readQuery<
+          SearchUsersData,
+          SearchUsersVariables
+        >({
+          query: userOperations.Queries.searchUsers,
+          variables: { username },
+        });
+
+        if (!existing) return;
+
+        const { searchUsers } = existing;
+
+        client.writeQuery<SearchUsersData, SearchUsersVariables>({
+          query: userOperations.Queries.searchUsers,
+          variables: { username },
+          data: {
+            searchUsers: searchUsers.map((request) => {
+              if (request.id === acceptedFriendRequestId) {
+                request.friendshipStatus === "ACCEPTED";
+              }
+              return request;
+            }),
+          },
+        });
+      },
+    }
+  );
+
+  useSubscription<DeclineFriendRequestData>(
+    userOperations.Subscriptions.acceptFriendRequest,
+    {
+      onData: ({ client, data }) => {
+        const { data: subscriptionData } = data;
+
+        if (!subscriptionData) return;
+
+        const {
+          declineFriendRequest: {
+            senderId,
+            receiverId,
+            id: acceptedFriendRequestId,
+          },
+        } = subscriptionData;
+
+        const existing = client.readQuery<
+          SearchUsersData,
+          SearchUsersVariables
+        >({
+          query: userOperations.Queries.searchUsers,
+          variables: { username },
+        });
+
+        if (!existing) return;
+
+        const { searchUsers } = existing;
+
+        client.writeQuery<SearchUsersData, SearchUsersVariables>({
+          query: userOperations.Queries.searchUsers,
+          variables: { username },
+          data: {
+            searchUsers: searchUsers.map((request) => {
+              if (request.id === acceptedFriendRequestId) {
+                request.friendshipStatus === "DECLINED";
+              }
+              return request;
+            }),
+          },
+        });
+      },
+    }
+  );
+
+  const [
+    sendFriendRequest,
+    { error, data, loading: sendFriendRequestLoading },
+  ] = useMutation<{ sendFriendRequest: boolean }, { userId: string }>(
+    userOperations.Mutation.sendFriendRequest
+  );
+
+  const onSendRequest = (receiverId: string) => {
     try {
       // send friend request
       sendFriendRequest({
         variables: {
-          userId: recieverId,
+          userId: receiverId,
         },
         update: (cache) => {
           const userSearch = cache.readQuery<SearchUsersData>({
@@ -58,25 +153,20 @@ const AddFriend: React.FC<AddFriendProps> = ({ session }) => {
 
           const { searchUsers: users } = userSearch;
 
-          console.log(users);
+          const updatedUsers = users.map((user) => {
+            if (user.id === receiverId) {
+              user.friendshipStatus === "PENDING";
+            }
+            return user;
+          });
 
-          const updatedIdx = users.findIndex((user) => user.id === recieverId);
-
-          console.log(updatedIdx);
-
-          if (updatedIdx < 0) return;
-
-          const clonedUsers = structuredClone(users);
-
-          clonedUsers[updatedIdx].friendshipStatus = "PENDING";
-
-          console.log(clonedUsers);
+          console.log("searchUsers", searchUsers);
 
           cache.writeQuery<SearchUsersData>({
             query: userOperations.Queries.searchUsers,
             variables: { username },
             data: {
-              searchUsers: clonedUsers,
+              searchUsers: updatedUsers,
             },
           });
         },

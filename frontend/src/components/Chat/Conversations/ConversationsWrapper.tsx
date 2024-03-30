@@ -125,7 +125,7 @@ const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
         }
 
         /**
-         * Already viewing conversation where new message is recieved;
+         * Already viewing conversation where new message is received;
          * no need to manually update cache due to message subscription
          */
         if (updatedConversationId === conversationId) {

@@ -1,28 +1,28 @@
 import { Avatar, Button, Flex, Stack, Text } from "@chakra-ui/react";
 import { SearchedUser } from "../../../../util/types";
 
-interface UserSearchListProps {
-  users: Array<SearchedUser>;
+interface FriendSearchListProps {
+  friends: Array<SearchedUser>;
   addParticipant: (user: SearchedUser) => void;
   participants: Array<SearchedUser>;
 }
 
-const UserSearchList: React.FC<UserSearchListProps> = ({
-  users,
+const FriendSearchList: React.FC<FriendSearchListProps> = ({
+  friends,
   addParticipant,
   participants,
 }) => {
   return (
     <>
-      {users.length === 0 ? (
+      {friends.length === 0 ? (
         <Flex mt={6} justify="center">
-          <Text>No users found</Text>
+          <Text>No friends found</Text>
         </Flex>
       ) : (
         <Stack mt={6}>
-          {users.map((user) => (
+          {friends.map((friend) => (
             <Stack
-              key={user.id}
+              key={friend.id}
               direction="row"
               align="center"
               spacing={4}
@@ -31,18 +31,18 @@ const UserSearchList: React.FC<UserSearchListProps> = ({
               borderRadius={4}
               _hover={{ bg: "whiteAlpha.200" }}
             >
-              <Avatar src={user.image} />
+              <Avatar src={friend.image} />
               <Flex justify="space-between" align="center" width="100%">
-                <Text color="whiteAlpha.700">{user.username}</Text>
+                <Text color="whiteAlpha.700">{friend.username}</Text>
                 <Button
                   bg="brand.100"
                   _hover={{ bg: "brand.100" }}
                   isDisabled={
                     !!participants.find(
-                      (participant) => participant.id === user.id
+                      (participant) => participant.id === friend.id
                     )
                   }
-                  onClick={() => addParticipant(user)}
+                  onClick={() => addParticipant(friend)}
                 >
                   Select
                 </Button>
@@ -55,4 +55,4 @@ const UserSearchList: React.FC<UserSearchListProps> = ({
   );
 };
 
-export default UserSearchList;
+export default FriendSearchList;

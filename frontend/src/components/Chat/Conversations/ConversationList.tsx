@@ -3,14 +3,17 @@ import { Session } from "next-auth";
 import ConversationModal from "./Modal/ConversationModal";
 import { useEffect, useState } from "react";
 import {
+  AcceptFriendRequestData,
   ConversationPopulated,
+  DeclineFriendRequestData,
   FriendRequestsData,
   ParticipantPopulated,
+  SendFriendRequestData,
 } from "../../../util/types";
 import ConversationItem from "./ConversationItem";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import conversationOperations from "../../../graphql/operations/conversation";
 import toast from "react-hot-toast";
 import { HiOutlineUsers } from "react-icons/hi";
@@ -62,7 +65,97 @@ const ConversationList: React.FC<ConversationListProps> = ({
     loading,
   } = useQuery<FriendRequestsData>(userOperations.Queries.friendRequests);
 
-  console.log("friendRequestData", friendRequestsData);
+  /**
+   * Subscriptions
+   */
+  useSubscription<AcceptFriendRequestData>(
+    userOperations.Subscriptions.acceptFriendRequest,
+    {
+      onData: ({ client, data }) => {
+        const { data: subscriptionData } = data;
+
+        if (!subscriptionData) return;
+
+        const existing = client.readQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+        });
+
+        if (!existing) return;
+
+        const { friendRequests } = existing;
+        const {
+          acceptFriendRequest: { id: acceptedFriendRequestId },
+        } = subscriptionData;
+
+        client.writeQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+          data: {
+            friendRequests: friendRequests.filter(
+              (request) => request.id !== acceptedFriendRequestId
+            ),
+          },
+        });
+      },
+    }
+  );
+
+  useSubscription<DeclineFriendRequestData>(
+    userOperations.Subscriptions.acceptFriendRequest,
+    {
+      onData: ({ client, data }) => {
+        const { data: subscriptionData } = data;
+
+        if (!subscriptionData) return;
+
+        const existing = client.readQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+        });
+
+        if (!existing) return;
+
+        const { friendRequests } = existing;
+        const {
+          declineFriendRequest: { id: declinedFriendRequestId },
+        } = subscriptionData;
+
+        client.writeQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+          data: {
+            friendRequests: friendRequests.filter(
+              (request) => request.id !== declinedFriendRequestId
+            ),
+          },
+        });
+      },
+    }
+  );
+
+  useSubscription<SendFriendRequestData>(
+    userOperations.Subscriptions.acceptFriendRequest,
+    {
+      onData: ({ client, data }) => {
+        const { data: subscriptionData } = data;
+
+        if (!subscriptionData) return;
+
+        const existing = client.readQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+        });
+
+        if (!existing) return;
+
+        const { friendRequests } = existing;
+        const { sendFriendRequest } = subscriptionData;
+
+        client.writeQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+          data: {
+            friendRequests: [sendFriendRequest, ...friendRequests],
+          },
+        });
+      },
+    }
+  );
 
   /**
    * Mutations

@@ -58,6 +58,14 @@ const typeDefs = gql`
   type Subscription {
     sendFriendRequest: FriendRequest
   }
+
+  type Subscription {
+    acceptFriendRequest: FriendRequest
+  }
+
+  type Subscription {
+    declineFriendRequest: FriendRequest
+  }
 `;
 
 export default typeDefs;

@@ -3,6 +3,7 @@ import { gql } from "@apollo/client";
 const friendRequestFields = `
   id
   status
+  receiverId
   sender {
     id
     username
@@ -53,11 +54,22 @@ const userOperations = {
   Subscriptions: {
     sendFriendRequest: gql`
       subscription SendFriendRequets {
-        friendRequestSent {
-          id
-          senderId
-          recieverId
-          status
+        sendFriendRequest {
+          ${friendRequestFields}
+        }
+      }
+    `,
+    acceptFriendRequest: gql`
+      subscription AcceptFriendRequets {
+        acceptFriendRequest {
+          ${friendRequestFields}
+        }
+      }
+    `,
+    declineFriendRequest: gql`
+      subscription DeclineFriendRequets {
+        declineFriendRequest {
+          ${friendRequestFields}
         }
       }
     `,

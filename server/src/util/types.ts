@@ -65,8 +65,16 @@ export type FriendRequestPopulated = Prisma.FriendRequestGetPayload<{
   select: typeof friendRequestPopulated;
 }>;
 
-export interface FriendRequestSentSubscriptionPayload {
-  friendRequestSent: FriendRequestPopulated;
+export interface SendFriendRequestSubscriptionPayload {
+  sendFriendRequest: FriendRequestPopulated;
+}
+
+export interface AcceptFriendRequestSubscriptionPayload {
+  acceptFriendRequest: FriendRequestPopulated;
+}
+
+export interface DeclineFriendRequestSubscriptionPayload {
+  declineFriendRequest: FriendRequestPopulated;
 }
 
 /**
