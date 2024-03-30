@@ -64,7 +64,52 @@ const resolvers = {
           },
         });
 
-        return messages;
+        const sentRequests = await prisma.friendRequest.findMany({
+          where: {
+            senderId: userId,
+            receiverId: {
+              in: messages.map((message) => message.senderId),
+            },
+          },
+        });
+
+        console.log("sentRequests", sentRequests);
+
+        const receivedRequests = await prisma.friendRequest.findMany({
+          where: {
+            receiverId: userId,
+            senderId: {
+              in: messages.map((message) => message.senderId),
+            },
+          },
+        });
+
+        console.log("receivedRequests", receivedRequests);
+
+        const requestHash: Record<string, string> = sentRequests.reduce(
+          (user: Record<string, string>, request) => {
+            user[request.receiverId] = request.status;
+            return user;
+          },
+          {}
+        );
+
+        receivedRequests.forEach((request) => {
+          requestHash[request.senderId] =
+            request.status !== "ACCEPTED" ? "SENDABLE" : "ACCEPTED";
+        });
+
+        const newMessages = messages.map((message) => ({
+          ...message,
+          sender: {
+            ...message.sender,
+            friendshipStatus: requestHash[message.senderId]
+              ? requestHash[message.senderId]
+              : "SENDABLE",
+          },
+        }));
+
+        return newMessages;
       } catch (error: any) {
         console.log("messages error", error);
         throw new GraphQLError(error?.message);

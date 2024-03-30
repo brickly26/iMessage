@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { ISODateString } from "next-auth";
 
 /**
  * Prisma validator for conversation and participants
@@ -19,6 +20,7 @@ export const messagePopulated = Prisma.validator<Prisma.MessageInclude>()({
     select: {
       id: true,
       username: true,
+      image: true,
     },
   },
 });
@@ -53,6 +55,14 @@ export interface SearchUsersData {
 }
 
 export interface SearchUsersVariables {
+  username: string;
+}
+
+export interface SearchFriendsData {
+  searchFriends: Array<SearchedFriend>;
+}
+
+export interface SearchFriendsVariables {
   username: string;
 }
 
@@ -96,6 +106,22 @@ export interface AcceptFriendRequestData {
 
 export interface DeclineFriendRequestData {
   declineFriendRequest: FriendRequest;
+}
+
+export interface AcceptFriendRequestSubscriptionData {
+  subscriptionData: {
+    data: {
+      acceptFriendRequest: FriendRequest;
+    };
+  };
+}
+
+export interface DeclineFriendRequestSubscriptionData {
+  subscriptionData: {
+    data: {
+      declineFriendRequest: FriendRequest;
+    };
+  };
 }
 
 /**
@@ -151,8 +177,23 @@ export type MessagePopulated = Prisma.MessageGetPayload<{
   include: typeof messagePopulated;
 }>;
 
+export interface MessageIsFriend {
+  id: string;
+  body: string;
+  createdAt: Date;
+  updatedAt: Date;
+  conversationId: string;
+  senderId: string;
+  sender: {
+    id: string;
+    username: string;
+    image: string;
+    friendshipStatus: string;
+  };
+}
+
 export interface MessagesData {
-  messages: Array<MessagePopulated>;
+  messages: Array<MessageIsFriend>;
 }
 
 export interface MessagesVariables {

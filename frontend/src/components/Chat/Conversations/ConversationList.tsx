@@ -100,7 +100,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   );
 
   useSubscription<DeclineFriendRequestData>(
-    userOperations.Subscriptions.acceptFriendRequest,
+    userOperations.Subscriptions.declineFriendRequest,
     {
       onData: ({ client, data }) => {
         const { data: subscriptionData } = data;
@@ -131,7 +131,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   );
 
   useSubscription<SendFriendRequestData>(
-    userOperations.Subscriptions.acceptFriendRequest,
+    userOperations.Subscriptions.sendFriendRequest,
     {
       onData: ({ client, data }) => {
         const { data: subscriptionData } = data;
@@ -227,7 +227,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
 
   const onEditConversation = (conversation: ConversationPopulated) => {
     setEditingConversation(conversation);
-    onOpen();
+    open();
   };
 
   const toggleCloseConvo = () => {

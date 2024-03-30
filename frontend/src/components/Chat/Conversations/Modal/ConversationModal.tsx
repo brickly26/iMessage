@@ -18,8 +18,11 @@ import {
   CreateConversationData,
   CreateConversationVariables,
   ParticipantPopulated,
+  SearchFriendsData,
+  SearchFriendsVariables,
   SearchUsersData,
   SearchUsersVariables,
+  SearchedFriend,
   SearchedUser,
 } from "../../../../util/types";
 import UserSearchList from "./UserSearchList";
@@ -56,7 +59,7 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
   getUserParticipantObject,
 }) => {
   const [username, setUsername] = useState("");
-  const [participants, setParticipants] = useState<Array<SearchedUser>>([]);
+  const [participants, setParticipants] = useState<Array<SearchedFriend>>([]);
   const [existingConversation, setExistingConversation] =
     useState<ConversationPopulated | null>(null);
 
@@ -67,14 +70,14 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
   const router = useRouter();
 
   const [
-    searchUsers,
+    searchFriends,
     {
-      data: searchedUsersData,
-      loading: searchedUsersLoading,
-      error: searchedUsersError,
+      data: searchedFriendsData,
+      loading: searchedFriendsLoading,
+      error: searchedFriendsError,
     },
-  ] = useLazyQuery<SearchUsersData, SearchUsersVariables>(
-    userOperations.Queries.searchUsers
+  ] = useLazyQuery<SearchFriendsData, SearchFriendsVariables>(
+    userOperations.Queries.searchFriends
   );
 
   const [createConversation, { loading: createConversationLoading }] =
@@ -213,11 +216,11 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
   const onSearch = (event: React.FormEvent) => {
     event.preventDefault();
 
-    // search users query
-    searchUsers({ variables: { username } });
+    // search Friends query
+    searchFriends({ variables: { username } });
   };
 
-  const addParticipant = (user: SearchedUser) => {
+  const addParticipant = (user: SearchedFriend) => {
     setParticipants((prev) => [...prev, user]);
     setUsername("");
   };
@@ -244,7 +247,7 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
   useEffect(() => {
     if (editingConversation) {
       setParticipants(
-        editingConversation.participants.map((p) => p.user as SearchedUser)
+        editingConversation.participants.map((p) => p.user as SearchedFriend)
       );
       return;
     }
@@ -284,15 +287,15 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
               <Button
                 type="submit"
                 disabled={!username}
-                isLoading={searchedUsersLoading}
+                isLoading={searchedFriendsLoading}
               >
                 Search
               </Button>
             </Stack>
           </form>
-          {searchedUsersData?.searchUsers && (
+          {searchedFriendsData?.searchFriends && (
             <FriendSearchList
-              friends={searchedUsersData?.searchUsers}
+              friends={searchedFriendsData?.searchFriends}
               addParticipant={addParticipant}
               participants={participants}
             />

@@ -493,7 +493,7 @@ const resolvers = {
       subscribe: withFilter(
         (_: any, __: any, context: GraphQLContext) => {
           const { pubsub } = context;
-          return pubsub.asyncIterator(["SEND_FRIEND_REQUEST"]);
+          return pubsub.asyncIterator(["DECLINE_FRIEND_REQUEST"]);
         },
         (
           payload: DeclineFriendRequestSubscriptionPayload,

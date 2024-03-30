@@ -1,10 +1,10 @@
 import { Avatar, Button, Flex, Stack, Text } from "@chakra-ui/react";
-import { SearchedUser } from "../../../../util/types";
+import { SearchedFriend } from "../../../../util/types";
 
 interface FriendSearchListProps {
-  friends: Array<SearchedUser>;
-  addParticipant: (user: SearchedUser) => void;
-  participants: Array<SearchedUser>;
+  friends: Array<SearchedFriend>;
+  addParticipant: (user: SearchedFriend) => void;
+  participants: Array<SearchedFriend>;
 }
 
 const FriendSearchList: React.FC<FriendSearchListProps> = ({

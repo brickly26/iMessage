@@ -23,6 +23,15 @@ const userOperations = {
         }
       }
     `,
+    searchFriends: gql`
+      query SearchFriends($username: String!) {
+        searchFriends(username: $username) {
+          id
+          username
+          image
+        }
+      }
+    `,
     friendRequests: gql`
       query FriendRequests {
         friendRequests {

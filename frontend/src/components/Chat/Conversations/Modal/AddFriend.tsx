@@ -8,7 +8,9 @@ import { useRouter } from "next/router";
 import userOperations from "../../../../graphql/operations/user";
 import {
   AcceptFriendRequestData,
+  AcceptFriendRequestSubscriptionData,
   DeclineFriendRequestData,
+  DeclineFriendRequestSubscriptionData,
   SearchUsersData,
   SearchUsersVariables,
   SearchedUser,
@@ -33,6 +35,7 @@ const AddFriend: React.FC<AddFriendProps> = ({ session }) => {
       data: searchedUsersData,
       loading: searchedUsersLoading,
       error: searchedUsersError,
+      subscribeToMore,
     },
   ] = useLazyQuery<SearchUsersData, SearchUsersVariables>(
     userOperations.Queries.searchUsers
@@ -41,93 +44,154 @@ const AddFriend: React.FC<AddFriendProps> = ({ session }) => {
   /**
    * Subscriptions
    */
-  useSubscription<AcceptFriendRequestData>(
-    userOperations.Subscriptions.acceptFriendRequest,
-    {
-      onData: ({ client, data }) => {
-        const { data: subscriptionData } = data;
 
-        if (!subscriptionData) return;
-
-        const {
-          acceptFriendRequest: {
-            senderId,
-            receiverId,
-            id: acceptedFriendRequestId,
-          },
-        } = subscriptionData;
-
-        const existing = client.readQuery<
-          SearchUsersData,
-          SearchUsersVariables
-        >({
-          query: userOperations.Queries.searchUsers,
-          variables: { username },
-        });
-
-        if (!existing) return;
-
-        const { searchUsers } = existing;
-
-        client.writeQuery<SearchUsersData, SearchUsersVariables>({
-          query: userOperations.Queries.searchUsers,
-          variables: { username },
-          data: {
-            searchUsers: searchUsers.map((request) => {
-              if (request.id === acceptedFriendRequestId) {
-                request.friendshipStatus === "ACCEPTED";
-              }
-              return request;
-            }),
-          },
-        });
+  const subscribeToMoreAcceptFriendRequest = (username: string) => {
+    return subscribeToMore({
+      document: userOperations.Subscriptions.acceptFriendRequest,
+      variables: {
+        username,
       },
-    }
-  );
+      updateQuery: (
+        prev,
+        { subscriptionData }: AcceptFriendRequestSubscriptionData
+      ) => {
+        if (!subscriptionData) return prev;
 
-  useSubscription<DeclineFriendRequestData>(
-    userOperations.Subscriptions.acceptFriendRequest,
-    {
-      onData: ({ client, data }) => {
-        const { data: subscriptionData } = data;
+        const { id: acceptedFriendReqeustId, sender } =
+          subscriptionData.data.acceptFriendRequest;
 
-        if (!subscriptionData) return;
-
-        const {
-          declineFriendRequest: {
-            senderId,
-            receiverId,
-            id: acceptedFriendRequestId,
-          },
-        } = subscriptionData;
-
-        const existing = client.readQuery<
-          SearchUsersData,
-          SearchUsersVariables
-        >({
-          query: userOperations.Queries.searchUsers,
-          variables: { username },
-        });
-
-        if (!existing) return;
-
-        const { searchUsers } = existing;
-
-        client.writeQuery<SearchUsersData, SearchUsersVariables>({
-          query: userOperations.Queries.searchUsers,
-          variables: { username },
-          data: {
-            searchUsers: searchUsers.map((request) => {
-              if (request.id === acceptedFriendRequestId) {
-                request.friendshipStatus === "DECLINED";
-              }
-              return request;
-            }),
-          },
-        });
+        return sender.id === userId
+          ? prev
+          : {
+              ...prev,
+              searchUsers: prev.searchUsers.map((request) => {
+                if (request.id === acceptedFriendReqeustId) {
+                  request.friendshipStatus = "ACCEPTED";
+                }
+                return request;
+              }),
+            };
       },
-    }
-  );
+    });
+  };
+
+  // useSubscription<AcceptFriendRequestData>(
+  //   userOperations.Subscriptions.acceptFriendRequest,
+  //   {
+  //     onData: ({ client, data }) => {
+  //       const { data: subscriptionData } = data;
+
+  //       if (!subscriptionData) return;
+
+  //       const {
+  //         acceptFriendRequest: {
+  //           senderId,
+  //           receiverId,
+  //           id: acceptedFriendRequestId,
+  //         },
+  //       } = subscriptionData;
+
+  //       const existing = client.readQuery<
+  //         SearchUsersData,
+  //         SearchUsersVariables
+  //       >({
+  //         query: userOperations.Queries.searchUsers,
+  //         variables: { username },
+  //       });
+
+  //       if (!existing) return;
+
+  //       const { searchUsers } = existing;
+
+  //       client.writeQuery<SearchUsersData, SearchUsersVariables>({
+  //         query: userOperations.Queries.searchUsers,
+  //         variables: { username },
+  //         data: {
+  //           searchUsers: searchUsers.map((request) => {
+  //             if (request.id === acceptedFriendRequestId) {
+  //               request.friendshipStatus = "ACCEPTED";
+  //             }
+  //             return request;
+  //           }),
+  //         },
+  //       });
+  //     },
+  //   }
+  // );
+
+  const subscribeToMoreDeclineFriendRequest = (username: string) => {
+    return subscribeToMore({
+      document: userOperations.Subscriptions.declineFriendRequest,
+      variables: {
+        username,
+      },
+      updateQuery: (
+        prev,
+        { subscriptionData }: DeclineFriendRequestSubscriptionData
+      ) => {
+        if (!subscriptionData) return prev;
+
+        const { id: declinedFriendReqeustId, sender } =
+          subscriptionData.data.declineFriendRequest;
+
+        return sender.id === userId
+          ? prev
+          : {
+              ...prev,
+              searchUsers: prev.searchUsers.map((request) => {
+                if (request.id === declinedFriendReqeustId) {
+                  request.friendshipStatus = "DECLINED";
+                }
+                return request;
+              }),
+            };
+      },
+    });
+  };
+
+  // useSubscription<DeclineFriendRequestData>(
+  //   userOperations.Subscriptions.declineFriendRequest,
+  //   {
+  //     onData: ({ client, data }) => {
+  //       const { data: subscriptionData } = data;
+
+  //       if (!subscriptionData) return;
+
+  //       const {
+  //         declineFriendRequest: {
+  //           senderId,
+  //           receiverId,
+  //           id: declinedFriendRequestId,
+  //         },
+  //       } = subscriptionData;
+
+  //       const existing = client.readQuery<
+  //         SearchUsersData,
+  //         SearchUsersVariables
+  //       >({
+  //         query: userOperations.Queries.searchUsers,
+  //         variables: { username },
+  //       });
+
+  //       if (!existing) return;
+
+  //       const { searchUsers } = existing;
+
+  //       client.writeQuery<SearchUsersData, SearchUsersVariables>({
+  //         query: userOperations.Queries.searchUsers,
+  //         variables: { username },
+  //         data: {
+  //           searchUsers: searchUsers.map((request) => {
+  //             if (request.id === declinedFriendRequestId) {
+  //               request.friendshipStatus = "DECLINED";
+  //             }
+  //             return request;
+  //           }),
+  //         },
+  //       });
+  //     },
+  //   }
+  // );
 
   const [
     sendFriendRequest,
@@ -183,6 +247,11 @@ const AddFriend: React.FC<AddFriendProps> = ({ session }) => {
     // search users query
     searchUsers({ variables: { username } });
   };
+
+  useEffect(() => {
+    subscribeToMoreAcceptFriendRequest(username);
+    subscribeToMoreDeclineFriendRequest(username);
+  }, [username]);
 
   return (
     <ModalBody>
