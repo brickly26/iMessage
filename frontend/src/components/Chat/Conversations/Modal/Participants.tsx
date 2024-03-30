@@ -1,9 +1,9 @@
 import { Flex, Stack, Text } from "@chakra-ui/react";
-import { SearchedUser } from "../../../../util/types";
+import { SearchedFriend, SearchedUser } from "../../../../util/types";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 
 interface ParticipantsProps {
-  participants: Array<SearchedUser>;
+  participants: Array<SearchedFriend>;
   removeParticipant: (userId: string) => void;
 }
 

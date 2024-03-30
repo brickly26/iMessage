@@ -5,6 +5,8 @@ export const MessageFields = `
   sender {
     id
     username
+    image
+    friendshipStatus
   }
   body
   createdAt

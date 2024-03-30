@@ -1,9 +1,15 @@
 import { gql } from "graphql-tag";
 
 const typeDefs = gql`
+  type MessageUser {
+    id: String
+    username: String
+    image: String
+    friendshipStatus: String
+  }
   type Message {
     id: String
-    sender: User
+    sender: MessageUser
     body: String
     createdAt: Date
   }

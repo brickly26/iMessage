@@ -7,6 +7,7 @@ import {
 } from "../graphql/resolvers/conversations";
 import { Context } from "graphql-ws/lib/server";
 import { PubSub } from "graphql-subscriptions";
+import { friendRequestPopulated } from "../graphql/resolvers/user";
 
 /**
  * Server Configuration
@@ -37,14 +38,43 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  emailVerified: boolean;
   image: string;
-  name: string;
+  canSendRequest: boolean;
+}
+
+export interface Friend {
+  id: string;
+  username: string;
+  email: string;
+  image: string;
 }
 
 export interface CreateUsernameResponse {
   success?: boolean;
   error?: string;
+}
+
+export interface FriendRequest {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  status: string;
+}
+
+export type FriendRequestPopulated = Prisma.FriendRequestGetPayload<{
+  select: typeof friendRequestPopulated;
+}>;
+
+export interface SendFriendRequestSubscriptionPayload {
+  sendFriendRequest: FriendRequestPopulated;
+}
+
+export interface AcceptFriendRequestSubscriptionPayload {
+  acceptFriendRequest: FriendRequestPopulated;
+}
+
+export interface DeclineFriendRequestSubscriptionPayload {
+  declineFriendRequest: FriendRequestPopulated;
 }
 
 /**

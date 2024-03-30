@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { ISODateString } from "next-auth";
 
 /**
  * Prisma validator for conversation and participants
@@ -19,6 +20,7 @@ export const messagePopulated = Prisma.validator<Prisma.MessageInclude>()({
     select: {
       id: true,
       username: true,
+      image: true,
     },
   },
 });
@@ -56,10 +58,70 @@ export interface SearchUsersVariables {
   username: string;
 }
 
+export interface SearchFriendsData {
+  searchFriends: Array<SearchedFriend>;
+}
+
+export interface SearchFriendsVariables {
+  username: string;
+}
+
 export interface SearchedUser {
   id: string;
   username: string;
   image: string;
+  friendshipStatus: string;
+}
+
+export interface SearchedFriend {
+  id: string;
+  username: string;
+  image: string;
+}
+
+export interface FriendRequest {
+  id: string;
+  status: string;
+  createdAt: string;
+  senderId: string;
+  receiverId: string;
+  sender: {
+    id: string;
+    username: string;
+    image: string;
+  };
+}
+
+export interface FriendRequestsData {
+  friendRequests: Array<FriendRequest>;
+}
+
+export interface SendFriendRequestData {
+  sendFriendRequest: FriendRequest;
+}
+
+export interface AcceptFriendRequestData {
+  acceptFriendRequest: FriendRequest;
+}
+
+export interface DeclineFriendRequestData {
+  declineFriendRequest: FriendRequest;
+}
+
+export interface AcceptFriendRequestSubscriptionData {
+  subscriptionData: {
+    data: {
+      acceptFriendRequest: FriendRequest;
+    };
+  };
+}
+
+export interface DeclineFriendRequestSubscriptionData {
+  subscriptionData: {
+    data: {
+      declineFriendRequest: FriendRequest;
+    };
+  };
 }
 
 /**
@@ -115,8 +177,23 @@ export type MessagePopulated = Prisma.MessageGetPayload<{
   include: typeof messagePopulated;
 }>;
 
+export interface MessageIsFriend {
+  id: string;
+  body: string;
+  createdAt: Date;
+  updatedAt: Date;
+  conversationId: string;
+  senderId: string;
+  sender: {
+    id: string;
+    username: string;
+    image: string;
+    friendshipStatus: string;
+  };
+}
+
 export interface MessagesData {
-  messages: Array<MessagePopulated>;
+  messages: Array<MessageIsFriend>;
 }
 
 export interface MessagesVariables {

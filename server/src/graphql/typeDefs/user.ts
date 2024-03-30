@@ -3,30 +3,68 @@ import { gql } from "graphql-tag";
 const typeDefs = gql`
   type User {
     id: String
-    name: String
     username: String
-    email: String
-    emailVerified: Boolean
     image: String
+    friendshipStatus: String
   }
 
-  type SearchedUser {
+  type FriendRequest {
+    id: String
+    senderId: String
+    receiverId: String
+    status: String
+    sender: User
+  }
+
+  type SearchedFriend {
     id: String
     username: String
     image: String
   }
 
   type Query {
-    searchUsers(username: String): [SearchedUser]
+    searchUsers(username: String): [User]
+  }
+
+  type Query {
+    searchFriends(username: String): [SearchedFriend]
+  }
+
+  type Query {
+    friendRequests: [FriendRequest]
   }
 
   type Mutation {
     createUsername(username: String): CreateUsernameResponse
   }
 
+  type Mutation {
+    sendFriendRequest(userId: String!): Boolean
+  }
+
+  type Mutation {
+    handleFriendRequest(requestId: String!, choice: String!): Boolean
+  }
+
+  type Mutation {
+    declineFriendRequest(requestId: String!): Boolean
+  }
+
   type CreateUsernameResponse {
     success: Boolean
     error: String
+  }
+
+  type Subscription {
+    sendFriendRequest: FriendRequest
+  }
+
+  type Subscription {
+    acceptFriendRequest: FriendRequest
+  }
+
+  type Subscription {
+    declineFriendRequest: FriendRequest
   }
 `;
 

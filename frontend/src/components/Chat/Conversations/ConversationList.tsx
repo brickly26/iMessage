@@ -1,18 +1,26 @@
-import { Box, Button, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, IconButton, Text } from "@chakra-ui/react";
 import { Session } from "next-auth";
-import ConversationModal from "./Modal/Modal";
-import { useState } from "react";
+import ConversationModal from "./Modal/ConversationModal";
+import { useEffect, useState } from "react";
 import {
+  AcceptFriendRequestData,
   ConversationPopulated,
+  DeclineFriendRequestData,
+  FriendRequestsData,
   ParticipantPopulated,
+  SendFriendRequestData,
 } from "../../../util/types";
 import ConversationItem from "./ConversationItem";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import conversationOperations from "../../../graphql/operations/conversation";
 import toast from "react-hot-toast";
-import { ConversationParticipant } from "@prisma/client";
+import { HiOutlineUsers } from "react-icons/hi";
+import { IoPersonAddOutline } from "react-icons/io5";
+import AddFriendModal from "./Modal/AddFriendModal";
+import FriendRequestModal from "./Modal/FriendRequestModal";
+import userOperations from "../../../graphql/operations/user";
 
 interface ConversationListProps {
   session: Session;
@@ -35,9 +43,119 @@ const ConversationList: React.FC<ConversationListProps> = ({
 
   const [editingConversation, setEditingConversation] =
     useState<ConversationPopulated | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const onOpen = () => setIsOpen(true);
-  const onClose = () => setIsOpen(false);
+
+  const [isOpenConvo, setIsOpenConvo] = useState(false);
+  const onOpenConvo = () => setIsOpenConvo(true);
+  const onCloseConvo = () => setIsOpenConvo(false);
+
+  const [isOpenFriendRequest, setIsOpenFriendRequest] = useState(false);
+  const onOpenFriendRequests = () => setIsOpenFriendRequest(true);
+  const onCloseFriendRequests = () => setIsOpenFriendRequest(false);
+
+  const [isOpenAddFriend, setIsOpenAddFriend] = useState(false);
+  const onOpenAddFriend = () => setIsOpenAddFriend(true);
+  const onCloseAddFriend = () => setIsOpenAddFriend(false);
+
+  /**
+   * Queries
+   */
+  const {
+    data: friendRequestsData,
+    error,
+    loading,
+  } = useQuery<FriendRequestsData>(userOperations.Queries.friendRequests);
+
+  /**
+   * Subscriptions
+   */
+  useSubscription<AcceptFriendRequestData>(
+    userOperations.Subscriptions.acceptFriendRequest,
+    {
+      onData: ({ client, data }) => {
+        const { data: subscriptionData } = data;
+
+        if (!subscriptionData) return;
+
+        const existing = client.readQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+        });
+
+        if (!existing) return;
+
+        const { friendRequests } = existing;
+        const {
+          acceptFriendRequest: { id: acceptedFriendRequestId },
+        } = subscriptionData;
+
+        client.writeQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+          data: {
+            friendRequests: friendRequests.filter(
+              (request) => request.id !== acceptedFriendRequestId
+            ),
+          },
+        });
+      },
+    }
+  );
+
+  useSubscription<DeclineFriendRequestData>(
+    userOperations.Subscriptions.declineFriendRequest,
+    {
+      onData: ({ client, data }) => {
+        const { data: subscriptionData } = data;
+
+        if (!subscriptionData) return;
+
+        const existing = client.readQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+        });
+
+        if (!existing) return;
+
+        const { friendRequests } = existing;
+        const {
+          declineFriendRequest: { id: declinedFriendRequestId },
+        } = subscriptionData;
+
+        client.writeQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+          data: {
+            friendRequests: friendRequests.filter(
+              (request) => request.id !== declinedFriendRequestId
+            ),
+          },
+        });
+      },
+    }
+  );
+
+  useSubscription<SendFriendRequestData>(
+    userOperations.Subscriptions.sendFriendRequest,
+    {
+      onData: ({ client, data }) => {
+        const { data: subscriptionData } = data;
+
+        if (!subscriptionData) return;
+
+        const existing = client.readQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+        });
+
+        if (!existing) return;
+
+        const { friendRequests } = existing;
+        const { sendFriendRequest } = subscriptionData;
+
+        client.writeQuery<FriendRequestsData>({
+          query: userOperations.Queries.friendRequests,
+          data: {
+            friendRequests: [sendFriendRequest, ...friendRequests],
+          },
+        });
+      },
+    }
+  );
 
   /**
    * Mutations
@@ -65,8 +183,6 @@ const ConversationList: React.FC<ConversationListProps> = ({
           participantIds,
         },
       });
-
-      console.log("leaving", errors, data);
 
       if (!data || errors) {
         throw new Error("Failed to update participants");
@@ -111,12 +227,12 @@ const ConversationList: React.FC<ConversationListProps> = ({
 
   const onEditConversation = (conversation: ConversationPopulated) => {
     setEditingConversation(conversation);
-    onOpen();
+    open();
   };
 
-  const toggleClose = () => {
+  const toggleCloseConvo = () => {
     setEditingConversation(null);
-    onClose();
+    onCloseConvo();
   };
 
   const sortedConversations = [...conversations].sort(
@@ -130,6 +246,20 @@ const ConversationList: React.FC<ConversationListProps> = ({
       height="100%"
       overflow="hidden"
     >
+      <Flex mb={4} justify="space-between">
+        <IconButton
+          bg="blackAlpha.300"
+          aria-label="Friends"
+          icon={<HiOutlineUsers />}
+          onClick={onOpenFriendRequests}
+        />
+        <IconButton
+          bg="blackAlpha.300"
+          aria-label="Friends"
+          icon={<IoPersonAddOutline />}
+          onClick={onOpenAddFriend}
+        />
+      </Flex>
       <Box
         py={2}
         px={4}
@@ -137,16 +267,30 @@ const ConversationList: React.FC<ConversationListProps> = ({
         bg="blackAlpha.300"
         borderRadius={4}
         cursor="pointer"
-        onClick={onOpen}
+        onClick={onOpenConvo}
       >
         <Text textAlign="center" color="whiteAlpha.800" fontWeight={500}>
           Find or start a conversation
         </Text>
       </Box>
 
+      <AddFriendModal
+        isOpen={isOpenAddFriend}
+        onClose={onCloseAddFriend}
+        session={session}
+      />
+
+      {friendRequestsData && (
+        <FriendRequestModal
+          isOpen={isOpenFriendRequest}
+          onClose={onCloseFriendRequests}
+          friendRequests={friendRequestsData.friendRequests}
+        />
+      )}
+
       <ConversationModal
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isOpenConvo}
+        onClose={toggleCloseConvo}
         session={session}
         conversations={conversations}
         editingConversation={editingConversation}
@@ -155,7 +299,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
       />
       {sortedConversations.map((conversation) => {
         const participant = conversation.participants.find(
-          (p: ConversationParticipant) => p.userId === session.user.id
+          (p) => p.userId === session.user.id
         );
         return (
           <ConversationItem

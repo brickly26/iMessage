@@ -67,6 +67,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
                   sender: {
                     id: session.user.id,
                     username: session.user.username,
+                    image: session.user.image,
+                    friendshipStatus: "ACCEPTED",
                   },
                   createdAt: new Date(Date.now()),
                   updatedAt: new Date(Date.now()),
