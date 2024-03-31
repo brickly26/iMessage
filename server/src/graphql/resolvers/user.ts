@@ -1,15 +1,14 @@
+import { Prisma, User } from "@prisma/client";
 import { GraphQLError } from "graphql";
-import {
-  CreateUsernameResponse,
-  FriendRequestPopulated,
-  SendFriendRequestSubscriptionPayload,
-  AcceptFriendRequestSubscriptionPayload,
-  DeclineFriendRequestSubscriptionPayload,
-  GraphQLContext,
-} from "../../util/types";
-import { $Enums, Prisma, PrismaClient, User } from "@prisma/client";
-import { DefaultArgs } from "@prisma/client/runtime/library";
 import { withFilter } from "graphql-subscriptions";
+import {
+  AcceptFriendRequestSubscriptionPayload,
+  CreateUsernameResponse,
+  DeclineFriendRequestSubscriptionPayload,
+  FriendRequestPopulated,
+  GraphQLContext,
+  SendFriendRequestSubscriptionPayload,
+} from "../../util/types";
 
 const resolvers = {
   Query: {

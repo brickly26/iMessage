@@ -6,7 +6,6 @@ import express from "express";
 import http from "http";
 import typeDefs from "./graphql/typeDefs";
 import resolvers from "./graphql/resolvers";
-import { getSession } from "next-auth/react";
 import * as dotenv from "dotenv";
 import cors from "cors";
 import { json } from "body-parser";
