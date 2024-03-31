@@ -80,6 +80,8 @@ async function main() {
     credentials: true,
   };
 
+  console.log("cors options:", corsOptions);
+
   app.use(
     "/graphql",
     cors<cors.CorsRequest>(corsOptions),
@@ -117,6 +119,8 @@ async function main() {
       },
     })
   );
+
+  console.log("app", app);
 
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: 4000 }, resolve)
