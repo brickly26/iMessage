@@ -7,6 +7,7 @@ const ConversationFields = `
       user {
         id
         username
+        image
       }
       hasSeenLatestMessage
     }
@@ -18,6 +19,21 @@ const ConversationFields = `
 
 const conversationOperations = {
   Queries: {
+    conversation: gql`
+      query Conversation($conversationId: String!) {
+        conversation(conversationId: $conversationId) {
+          id
+          participants {
+            user {
+              id
+              username
+              image
+              friendshipStatus
+            }
+          }
+        }
+      }
+    `,
     conversations: gql`
       query Conversations {
         conversations {

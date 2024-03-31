@@ -21,6 +21,7 @@ import { IoPersonAddOutline } from "react-icons/io5";
 import AddFriendModal from "./Modal/AddFriendModal";
 import FriendRequestModal from "./Modal/FriendRequestModal";
 import userOperations from "../../../graphql/operations/user";
+import { css } from "@emotion/react";
 
 interface ConversationListProps {
   session: Session;
@@ -64,6 +65,8 @@ const ConversationList: React.FC<ConversationListProps> = ({
     error,
     loading,
   } = useQuery<FriendRequestsData>(userOperations.Queries.friendRequests);
+
+  console.log("friendRequest data", error);
 
   /**
    * Subscriptions
@@ -137,6 +140,10 @@ const ConversationList: React.FC<ConversationListProps> = ({
         const { data: subscriptionData } = data;
 
         if (!subscriptionData) return;
+
+        if (subscriptionData.sendFriendRequest.sender.id === userId) return;
+
+        console.log("sub data", subscriptionData);
 
         const existing = client.readQuery<FriendRequestsData>({
           query: userOperations.Queries.friendRequests,
@@ -227,7 +234,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
 
   const onEditConversation = (conversation: ConversationPopulated) => {
     setEditingConversation(conversation);
-    open();
+    onOpenConvo();
   };
 
   const toggleCloseConvo = () => {
@@ -248,9 +255,35 @@ const ConversationList: React.FC<ConversationListProps> = ({
     >
       <Flex mb={4} justify="space-between">
         <IconButton
+          css={css`
+            position: relative !important;
+          `}
           bg="blackAlpha.300"
           aria-label="Friends"
-          icon={<HiOutlineUsers />}
+          icon={
+            <>
+              <HiOutlineUsers />
+              {friendRequestsData?.friendRequests &&
+                friendRequestsData.friendRequests.length !== 0 && (
+                  <Box
+                    as={"span"}
+                    color={"white"}
+                    position={"absolute"}
+                    top={"2px"}
+                    right={"2px"}
+                    fontSize={12}
+                    bgColor={"red"}
+                    borderRadius={"1000px"}
+                    zIndex={9999}
+                    width={4}
+                    height={4}
+                    p={"1px"}
+                  >
+                    {friendRequestsData.friendRequests.length}
+                  </Box>
+                )}
+            </>
+          }
           onClick={onOpenFriendRequests}
         />
         <IconButton

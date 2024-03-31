@@ -139,6 +139,20 @@ export interface ConversationsData {
   conversations: Array<ConversationPopulated>;
 }
 
+export interface ConversationData {
+  conversation: {
+    id: string;
+    participants: Array<{
+      user: {
+        id: string;
+        username: string;
+        image: string;
+        friendshipStatus: string;
+      };
+    }>;
+  };
+}
+
 export interface CreateConversationData {
   createConversation: {
     conversationId: string;

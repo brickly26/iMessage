@@ -17,18 +17,15 @@ const FriendRequestList: React.FC<FriendRequestListProps> = ({
   handleFriendRequest,
   friendRequestLoading: { loading, choice, requestId },
 }) => {
-  const friendRequestList = friendRequests.filter(
-    (request) => request.status === "PENDING"
-  );
   return (
     <>
-      {friendRequestList.length === 0 ? (
+      {friendRequests.length === 0 ? (
         <Flex mt={6} justify="center">
           <Text>No Friend Requests</Text>
         </Flex>
       ) : (
         <Stack mt={6}>
-          {friendRequestList.map((friendRequest) => {
+          {friendRequests.map((friendRequest) => {
             return (
               <Stack
                 key={friendRequest.id}

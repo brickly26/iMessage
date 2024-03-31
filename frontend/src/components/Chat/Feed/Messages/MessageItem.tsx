@@ -21,6 +21,7 @@ import enUS from "date-fns/locale/en-US";
 interface MessageItemProps {
   message: MessageIsFriend;
   sentByMe: boolean;
+  sendRequest: (receiverId: string) => void;
 }
 
 const formateRelativeLocale = {
@@ -30,43 +31,13 @@ const formateRelativeLocale = {
   other: "MM/dd/yy",
 };
 
-const MessageItem: React.FC<MessageItemProps> = ({ message, sentByMe }) => {
+const MessageItem: React.FC<MessageItemProps> = ({
+  message,
+  sentByMe,
+  sendRequest,
+}) => {
   return (
     <Popover>
-      <PopoverContent>
-        <PopoverCloseButton />
-        <PopoverBody>
-          <Stack
-            key={message.sender.id}
-            direction="row"
-            align="center"
-            spacing={4}
-            py={2}
-            px={4}
-            borderRadius={4}
-            _hover={{ bg: "whiteAlpha.200" }}
-          >
-            <Avatar src={message.sender.image} />
-            <Flex justify="space-between" align="center" width="100%">
-              <Text color="whiteAlpha.700">{message.sender.username}</Text>
-              <Button
-                bg="brand.100"
-                _hover={{ bg: "brand.100" }}
-                isDisabled={message.sender.friendshipStatus !== "SENDABLE"}
-                onClick={() => {
-                  // sendRequest(message.sender.id)
-                }}
-              >
-                {message.sender.friendshipStatus == "SENDABLE" && "+ Add"}
-                {message.sender.friendshipStatus == "ACCEPTED" && "Friends"}
-                {message.sender.friendshipStatus == "DECLINED" &&
-                  "Already Sent"}
-                {message.sender.friendshipStatus == "PENDING" && "Already Sent"}
-              </Button>
-            </Flex>
-          </Stack>
-        </PopoverBody>
-      </PopoverContent>
       <Stack
         direction="row"
         p={4}
@@ -120,6 +91,41 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, sentByMe }) => {
           </Flex>
         </Stack>
       </Stack>
+      <PopoverContent border="none">
+        <PopoverArrow />
+        <PopoverCloseButton />
+        <PopoverBody>
+          <Stack
+            key={message.sender.id}
+            direction="row"
+            align="center"
+            spacing={4}
+            py={4}
+            px={6}
+            borderRadius={4}
+          >
+            <Avatar />
+            {/* <Avatar src={participant.user.image} /> */}
+            <Flex justify="space-between" align="center" width="100%" gap={5}>
+              <Text color="whiteAlpha.700">{message.sender.username}</Text>
+              <Button
+                bg="brand.100"
+                _hover={{ bg: "brand.100" }}
+                isDisabled={message.sender.friendshipStatus !== "SENDABLE"}
+                onClick={() => {
+                  sendRequest(message.sender.id);
+                }}
+              >
+                {message.sender.friendshipStatus == "SENDABLE" && "+ Add"}
+                {message.sender.friendshipStatus == "ACCEPTED" && "Friends"}
+                {message.sender.friendshipStatus == "DECLINED" &&
+                  "Already Sent"}
+                {message.sender.friendshipStatus == "PENDING" && "Already Sent"}
+              </Button>
+            </Flex>
+          </Stack>
+        </PopoverBody>
+      </PopoverContent>
     </Popover>
   );
 };

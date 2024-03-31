@@ -51,6 +51,24 @@ const typeDefs = gql`
   }
 
   type Query {
+    conversation(conversationId: String): ConversationIsParticipantFriend
+  }
+
+  type ConversationIsParticipantFriend {
+    id: String
+    latestMessage: Message
+    participants: [ParticipantIsFriend]
+    createdAt: Date
+    updatedAt: Date
+  }
+
+  type ParticipantIsFriend {
+    id: String
+    user: MessageUser
+    hasSeenLatestMessage: Boolean
+  }
+
+  type Query {
     conversations: [Conversation]
   }
 

@@ -160,7 +160,13 @@ const resolvers = {
           throw new GraphQLError("User doesnt exits");
         }
 
-        return user?.receivedRequests;
+        console.log(user.receivedRequests);
+
+        const friendRequestList = user.receivedRequests.filter(
+          (request) => request.status === "PENDING"
+        );
+
+        return friendRequestList;
       } catch (error: any) {
         console.log("searchFriends Error", error);
         throw new GraphQLError(error?.message);

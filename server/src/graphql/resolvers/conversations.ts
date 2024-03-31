@@ -13,6 +13,95 @@ import { ObjectID } from "bson";
 
 const resolvers = {
   Query: {
+    conversation: async (
+      _: any,
+      args: { conversationId: string },
+      context: GraphQLContext
+    ): Promise<ConversationPopulated> => {
+      const { session, prisma } = context;
+      const { conversationId } = args;
+
+      if (!session?.user) {
+        throw new GraphQLError("Not authorized");
+      }
+
+      const {
+        user: { id: userId },
+      } = session;
+
+      try {
+        /**
+         * Find all conversations that user is part of
+         */
+        const conversation = await prisma.conversation.findFirst({
+          where: {
+            id: conversationId,
+          },
+          include: conversationPopulated,
+        });
+
+        if (!conversation) {
+          throw new GraphQLError("Conversation does not exist");
+        }
+
+        const sentRequests = await prisma.friendRequest.findMany({
+          where: {
+            senderId: userId,
+            receiverId: {
+              in: conversation.participants.map(
+                (participant) => participant.user.id
+              ),
+            },
+          },
+        });
+
+        console.log("sentRequests", sentRequests);
+
+        const receivedRequests = await prisma.friendRequest.findMany({
+          where: {
+            receiverId: userId,
+            senderId: {
+              in: conversation.participants.map(
+                (participant) => participant.user.id
+              ),
+            },
+          },
+        });
+
+        console.log("receivedRequests", receivedRequests);
+
+        const requestHash: Record<string, string> = sentRequests.reduce(
+          (user: Record<string, string>, request) => {
+            user[request.receiverId] = request.status;
+            return user;
+          },
+          {}
+        );
+
+        receivedRequests.forEach((request) => {
+          requestHash[request.senderId] =
+            request.status !== "ACCEPTED" ? "SENDABLE" : "ACCEPTED";
+        });
+
+        const newConversation = {
+          ...conversation,
+          participants: conversation.participants.map((participant) => ({
+            ...participant,
+            user: {
+              ...participant.user,
+              friendshipStatus: requestHash[participant.userId]
+                ? requestHash[participant.userId]
+                : "SENDABLE",
+            },
+          })),
+        };
+
+        return newConversation;
+      } catch (error: any) {
+        console.log("Conversations Error", error);
+        throw new GraphQLError(error?.message);
+      }
+    },
     conversations: async (
       _: any,
       __: any,
@@ -406,6 +495,7 @@ export const participantPopulated =
       select: {
         id: true,
         username: true,
+        image: true,
       },
     },
   });
