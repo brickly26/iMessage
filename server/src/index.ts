@@ -116,9 +116,7 @@ async function main() {
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: 4000 }, resolve)
   );
-  console.log(
-    `🚀 Server ready at https://imessage.railway.internal:4000/graphql`
-  );
+  console.log(`🚀 Server ready at https://imessage.railway.internal/graphql`);
 }
 
 main().catch((err) => console.log(err));
