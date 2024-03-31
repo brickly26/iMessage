@@ -1,18 +1,13 @@
-import gql from "graphql-tag";
+import { GraphQLError } from "graphql";
+import { withFilter } from "graphql-subscriptions";
+import { userIsConversationParticipant } from "../../util/functions";
 import {
   GraphQLContext,
   MessagePopulated,
   MessageSentSubscriptionPayload,
   SendMessageArguements,
 } from "../../util/types";
-import { GraphQLError } from "graphql";
-import {
-  conversationPopulated,
-  messagePopulated,
-  participantPopulated,
-} from "./conversations";
-import { withFilter } from "graphql-subscriptions";
-import { userIsConversationParticipant } from "../../util/functions";
+import { conversationPopulated, messagePopulated } from "./conversations";
 
 const resolvers = {
   Query: {

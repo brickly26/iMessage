@@ -1,4 +1,8 @@
+import { Prisma } from "@prisma/client";
+import { ObjectID } from "bson";
 import { GraphQLError } from "graphql";
+import { withFilter } from "graphql-subscriptions";
+import { userIsConversationParticipant } from "../../util/functions";
 import {
   ConversationCreatedSubscriptionPayload,
   ConversationDeletedSubscriptionPayload,
@@ -6,10 +10,6 @@ import {
   ConversationUpdatedSubscriptionPayload,
   GraphQLContext,
 } from "../../util/types";
-import { Prisma } from "@prisma/client";
-import { withFilter } from "graphql-subscriptions";
-import { userIsConversationParticipant } from "../../util/functions";
-import { ObjectID } from "bson";
 
 const resolvers = {
   Query: {
@@ -196,7 +196,7 @@ const resolvers = {
       args: { userId: string; conversationId: string },
       context: GraphQLContext
     ): Promise<boolean> => {
-      const { prisma, session, pubsub } = context;
+      const { prisma, session } = context;
       const { userId, conversationId } = args;
 
       if (!session?.user) {
@@ -295,10 +295,6 @@ const resolvers = {
       if (!session?.user) {
         throw new GraphQLError("Not Authorized");
       }
-
-      const {
-        user: { id: userId },
-      } = session;
 
       try {
         const conversation = await prisma.conversation.findUnique({
@@ -439,7 +435,6 @@ const resolvers = {
           const {
             conversationUpdated: {
               conversation: { participants, latestMessage },
-              addedUserIds,
               removedUserIds,
             },
           } = payload;
