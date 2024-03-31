@@ -4,7 +4,7 @@ import { getMainDefinition } from "@apollo/client/utilities";
 import { createClient } from "graphql-ws";
 import { getSession } from "next-auth/react";
 
-const apolloUrl = process.env.APOLLO_GRAPHQL_SERVER_BASE_UR as string;
+const apolloUrl = process.env.APOLLO_GRAPHQL_SERVER_BASE_URL as string;
 
 if (typeof apolloUrl !== "string") {
   console.log(apolloUrl);
