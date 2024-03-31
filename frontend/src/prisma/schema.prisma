@@ -6,7 +6,6 @@ datasource db {
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "darwin"]
-  output        = "./generated/client"
 }
 
 model Account {
@@ -36,19 +35,6 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-  id            String                    @id @default(auto()) @map("_id") @db.ObjectId
-  name          String?
-  email         String?                   @unique
-  username      String?                   @unique
-  emailVerified DateTime?
-  conversations ConversationParticipant[]
-  messages      Message[]
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-}
-
 model VerificationToken {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   identifier String
@@ -56,6 +42,42 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model User {
+  id               String                    @id @default(auto()) @map("_id") @db.ObjectId
+  name             String?
+  email            String?                   @unique
+  username         String?                   @unique
+  emailVerified    DateTime?
+  conversations    ConversationParticipant[]
+  messages         Message[]
+  image            String?
+  accounts         Account[]
+  sessions         Session[]
+  sentRequests     FriendRequest[]           @relation(name: "sentRequests")
+  receivedRequests FriendRequest[]           @relation(name: "receivedRequests")
+  friends          User[]                    @relation("Friends", fields: [friendIds], references: [id])
+  friendIds        String[]                  @db.ObjectId
+  friendsWith      User[]                    @relation("Friends", fields: [friendsWithIds], references: [id])
+  friendsWithIds   String[]                  @db.ObjectId
+}
+
+model FriendRequest {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  status        RequestStatus
+  sender        User          @relation(name: "sentRequests", fields: [senderId], references: [id])
+  senderId      String        @db.ObjectId
+  receiver      User          @relation(name: "receivedRequests", fields: [receiverId], references: [id])
+  receiverId    String        @db.ObjectId
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 model Conversation {
@@ -73,7 +95,7 @@ model ConversationParticipant {
   userId               String       @db.ObjectId
   user                 User         @relation(fields: [userId], references: [id])
   conversationId       String       @db.ObjectId
-  Conversation         Conversation @relation(fields: [conversationId], references: [id])
+  Conversation         Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   hasSeenLatestMessage Boolean
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
