@@ -76,7 +76,7 @@ async function main() {
   console.log(process.env.CLIENT_ORIGIN);
 
   const corsOptions = {
-    origin: process.env.CLIENT_ORIGIN,
+    origin: process.env.CLIENT_ORIGIN as string,
     credentials: true,
   };
 
@@ -89,8 +89,10 @@ async function main() {
         const cookies = req?.headers?.cookie;
         const parsedCookies = require("cookie").parse(cookies);
         const sessionToken = parsedCookies["next-auth.session-token"];
+        console.log("1");
 
         if (sessionToken) {
+          console.log("2");
           const sessionResponse = await fetch(
             `${process.env.CLIENT_ORIGIN}/api/auth/session`,
             {
@@ -100,9 +102,10 @@ async function main() {
             }
           );
 
-          console.log("hello");
+          console.log("3");
 
           const session = (await sessionResponse.json()) as Session;
+          console.log("4");
           return {
             session,
             prisma,
