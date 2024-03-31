@@ -219,7 +219,7 @@ const AddFriend: React.FC<AddFriendProps> = ({ session }) => {
 
           const updatedUsers = users.map((user) => {
             if (user.id === receiverId) {
-              user.friendshipStatus === "PENDING";
+              user.friendshipStatus = "PENDING";
             }
             return user;
           });

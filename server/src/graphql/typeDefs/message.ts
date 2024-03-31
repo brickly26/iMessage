@@ -7,6 +7,7 @@ const typeDefs = gql`
     image: String
     friendshipStatus: String
   }
+
   type Message {
     id: String
     sender: MessageUser
