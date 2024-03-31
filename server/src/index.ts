@@ -87,15 +87,18 @@ async function main() {
         const cookies = req?.headers?.cookie;
         const parsedCookies = require("cookie").parse(cookies);
         const sessionToken = parsedCookies["next-auth.session-token"];
+
         if (sessionToken) {
           const sessionResponse = await fetch(
-            "http://localhost:3000/api/auth/session",
+            `${process.env.CLIENT_ORIGIN}/api/auth/session`,
             {
               headers: {
                 Cookie: `next-auth.session-token=${sessionToken}`,
               },
             }
           );
+
+          console.log("hello");
 
           const session = (await sessionResponse.json()) as Session;
           return {
@@ -113,7 +116,9 @@ async function main() {
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: 4000 }, resolve)
   );
-  console.log(`🚀 Server ready at http://localhost:4000/graphql`);
+  console.log(
+    `🚀 Server ready at https://imessage.railway.internal:4000/graphql`
+  );
 }
 
 main().catch((err) => console.log(err));
