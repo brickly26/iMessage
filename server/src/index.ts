@@ -85,7 +85,7 @@ async function main() {
   app.use(
     "/graphql",
     json(),
-    cors<cors.CorsRequest>(corsOptions),
+    cors<cors.CorsRequest>(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
         const cookies = req?.headers?.cookie;
