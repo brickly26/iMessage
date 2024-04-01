@@ -76,7 +76,7 @@ async function main() {
   console.log(process.env.CLIENT_ORIGIN);
 
   const corsOptions = {
-    origin: process.env.CLIENT_ORIGIN,
+    origin: "https://i-message-delta.vercel.app",
     credentials: true,
   };
 
@@ -101,6 +101,8 @@ async function main() {
             {
               headers: {
                 Cookie: `next-auth.session-token=${sessionToken}`,
+                "Access-Control-Allow-Origin":
+                  "https://i-message-delta.vercel.app",
               },
             }
           );
