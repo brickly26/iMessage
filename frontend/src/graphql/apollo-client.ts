@@ -22,7 +22,7 @@ const wsLink =
   typeof window !== "undefined"
     ? new GraphQLWsLink(
         createClient({
-          url: `ws://${apolloUrl}/graphql/subscriptions`,
+          url: `wss://${apolloUrl}/graphql/subscriptions`,
           connectionParams: async () => ({
             session: await getSession(),
           }),
@@ -49,3 +49,8 @@ export const client = new ApolloClient({
   link,
   cache: new InMemoryCache(),
 });
+function setContext(
+  arg0: (_: any, { headers }: { headers: any }) => { headers: any }
+) {
+  throw new Error("Function not implemented.");
+}

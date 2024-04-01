@@ -76,15 +76,16 @@ async function main() {
   console.log(process.env.CLIENT_ORIGIN);
 
   const corsOptions = {
-    origin: process.env.CLIENT_ORIGIN as string,
+    origin: process.env.CLIENT_ORIGIN,
     credentials: true,
   };
 
   console.log("cors options:", corsOptions);
 
+  app.use(cors<cors.CorsRequest>(corsOptions));
+
   app.use(
     "/graphql",
-    cors<cors.CorsRequest>(corsOptions),
     json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
@@ -119,8 +120,6 @@ async function main() {
       },
     })
   );
-
-  console.log("app", app);
 
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: 4000 }, resolve)
