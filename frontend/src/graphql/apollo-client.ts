@@ -4,14 +4,14 @@ import { getMainDefinition } from "@apollo/client/utilities";
 import { createClient } from "graphql-ws";
 import { getSession } from "next-auth/react";
 
-const apolloUrl = process.env.APOLLO_GRAPHQL_SERVER_BASE_URL as string;
+let apolloUrl = process.env.APOLLO_GRAPHQL_SERVER_BASE_URL as string;
 
 if (typeof apolloUrl !== "string") {
   console.log(apolloUrl);
   throw Error("poop");
 }
 
-console.log(apolloUrl);
+apolloUrl = "imessage.up.railway.app";
 
 const httpLink = new HttpLink({
   uri: `https://${apolloUrl}/graphql`,
@@ -22,7 +22,7 @@ const wsLink =
   typeof window !== "undefined"
     ? new GraphQLWsLink(
         createClient({
-          url: `wss://${apolloUrl}/graphql/subscriptions`,
+          url: `ws://${apolloUrl}/graphql/subscriptions`,
           connectionParams: async () => ({
             session: await getSession(),
           }),
@@ -49,8 +49,3 @@ export const client = new ApolloClient({
   link,
   cache: new InMemoryCache(),
 });
-function setContext(
-  arg0: (_: any, { headers }: { headers: any }) => { headers: any }
-) {
-  throw new Error("Function not implemented.");
-}
