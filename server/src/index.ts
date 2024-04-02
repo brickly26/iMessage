@@ -101,7 +101,7 @@ async function main() {
         if (sessionToken) {
           console.log("2");
           const sessionResponse = await fetch(
-            `${"http://localhost:3000"}/api/auth/session`,
+            `${process.env.CLIENT_ORIGIN}/api/auth/session`,
             {
               headers: {
                 Cookie: `next-auth.session-token=${sessionToken}`,
