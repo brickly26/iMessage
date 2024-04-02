@@ -89,8 +89,7 @@ async function main() {
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
         const cookies = req?.headers?.cookie;
-        console.log("0", req);
-        console.log(cookies);
+        console.log("0", req?.headers);
 
         const parsedCookies = require("cookie").parse(cookies);
         console.log("1");
@@ -103,7 +102,7 @@ async function main() {
             `${process.env.CLIENT_ORIGIN}/api/auth/session`,
             {
               headers: {
-                cookie: `next-auth.session-token=${sessionToken}`,
+                Cookie: `next-auth.session-token=${sessionToken}`,
               },
             }
           );
