@@ -6,7 +6,11 @@ import { getSession } from "next-auth/react";
 
 let apolloUrl = process.env.APOLLO_GRAPHQL_SERVER_BASE_URL as string;
 
-const apolloHTTPUrl = `https://${apolloUrl}/graphql`;
+let apolloHTTPUrl = `https://${apolloUrl}/graphql`;
+
+if (process.env.APOLLO_GRAPHQL_SERVER_BASE_URL === "localhost:4000") {
+  apolloHTTPUrl = `http://${apolloUrl}/graphql`;
+}
 
 const apolloWSUrl = `ws://${apolloUrl}/graphql/subscriptions`;
 
@@ -14,6 +18,8 @@ if (typeof apolloUrl !== "string") {
   console.log(apolloUrl);
   throw Error("poop");
 }
+
+console.log(apolloHTTPUrl);
 
 const httpLink = new HttpLink({
   uri: apolloHTTPUrl,
