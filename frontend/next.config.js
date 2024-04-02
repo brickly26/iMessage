@@ -14,7 +14,7 @@ const nextConfig = {
           { key: "Access-Control-Allow-Credentials", value: "true" },
           {
             key: "Access-Control-Allow-Origin",
-            value: `https://imessage.up.railway.app`,
+            value: "https://imessage.up.railway.app",
           },
           {
             key: "Access-Control-Allow-Methods",
