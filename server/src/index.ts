@@ -76,7 +76,7 @@ async function main() {
   console.log(process.env.CLIENT_ORIGIN);
 
   const corsOptions = {
-    origin: [process.env.CLIENT_ORIGIN as string, "http://192.168.1.159:3000"],
+    origin: process.env.CLIENT_ORIGIN as string,
     credentials: true,
   };
 
@@ -98,7 +98,7 @@ async function main() {
         if (sessionToken) {
           console.log("2");
           const sessionResponse = await fetch(
-            `${"http://192.168.1.159:3000"}/api/auth/session`,
+            `${process.env.CLIENT_ORIGIN}/api/auth/session`,
             {
               headers: {
                 cookie: `next-auth.session-token=${sessionToken}`,
