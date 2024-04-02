@@ -9,32 +9,12 @@ const nextConfig = {
     return [
       {
         // matching all API routes
-        source: "/api/auth/callback/google",
+        source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
           {
             key: "Access-Control-Allow-Origin",
-            value: "http://localhost:4000",
-          },
-          {
-            key: "Access-Control-Allow-Methods",
-            value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
-          },
-          {
-            key: "Access-Control-Allow-Headers",
-            value:
-              "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
-          },
-        ],
-      },
-      {
-        // matching all API routes
-        source: "/api/auth/session",
-        headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
-          {
-            key: "Access-Control-Allow-Origin",
-            value: "http://localhost:4000",
+            value: "http://96.250.8.61:4000",
           },
           {
             key: "Access-Control-Allow-Methods",
