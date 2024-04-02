@@ -14,7 +14,7 @@ const nextConfig = {
           { key: "Access-Control-Allow-Credentials", value: "true" },
           {
             key: "Access-Control-Allow-Origin",
-            value: `https://${process.env.APOLLO_GRAPHQL_SERVER_BASE_URL}`,
+            value: `https://imessage.up.railway.app`,
           },
           {
             key: "Access-Control-Allow-Methods",
