@@ -11,7 +11,7 @@ if (typeof apolloUrl !== "string") {
   throw Error("poop");
 }
 
-apolloUrl = "imessage.up.railway.app";
+// apolloUrl = "localhost:4000";
 
 const httpLink = new HttpLink({
   uri: `https://${apolloUrl}/graphql`,
