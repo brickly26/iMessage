@@ -14,6 +14,7 @@ import { PrismaClient } from "@prisma/client";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 import { PubSub } from "graphql-subscriptions";
+import { getSession } from "next-auth/react";
 
 async function main() {
   dotenv.config();
@@ -76,7 +77,7 @@ async function main() {
   console.log(process.env.CLIENT_ORIGIN);
 
   const corsOptions = {
-    origin: process.env.CLIENT_ORIGIN as string,
+    origin: [process.env.CLIENT_ORIGIN as string, "http://localhost:3000"],
     credentials: true,
   };
 
@@ -100,7 +101,7 @@ async function main() {
         if (sessionToken) {
           console.log("2");
           const sessionResponse = await fetch(
-            `${process.env.CLIENT_ORIGIN}/api/auth/session`,
+            `${"http://localhost:3000"}/api/auth/session`,
             {
               headers: {
                 Cookie: `next-auth.session-token=${sessionToken}`,
@@ -125,7 +126,7 @@ async function main() {
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: process.env.PORT || 4000 }, resolve)
   );
-  console.log(`🚀 Server ready at https://imessage.up.railway/graphql`);
+  console.log(`🚀 Server ready at https://imessage.up.railway.app/graphql`);
 }
 
 main().catch((err) => console.log(err));
