@@ -55,5 +55,6 @@ const link =
 
 export const client = new ApolloClient({
   link,
+  credentials: "include",
   cache: new InMemoryCache(),
 });
