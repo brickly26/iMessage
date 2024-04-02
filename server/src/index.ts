@@ -76,7 +76,7 @@ async function main() {
   console.log(process.env.CLIENT_ORIGIN);
 
   const corsOptions = {
-    origin: process.env.CLIENT_ORIGIN,
+    origin: ["https://i-message-delta.vercel.app", "http://localhost:3000"],
     credentials: true,
   };
 
@@ -89,6 +89,8 @@ async function main() {
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
         const cookies = req?.headers?.cookie;
+        console.log(req);
+
         const parsedCookies = require("cookie").parse(cookies);
         const sessionToken = parsedCookies["next-auth.session-token"];
         console.log("1");
@@ -96,7 +98,7 @@ async function main() {
         if (sessionToken) {
           console.log("2");
           const sessionResponse = await fetch(
-            `${process.env.CLIENT_ORIGIN}/api/auth/session`,
+            `${"https://i-message-delta.vercel.app"}/api/auth/session`,
             {
               headers: {
                 Cookie: `next-auth.session-token=${sessionToken}`,
@@ -107,7 +109,7 @@ async function main() {
           console.log("3");
 
           const session = (await sessionResponse.json()) as Session;
-          console.log("4");
+          console.log("4", session);
           return {
             session,
             prisma,
