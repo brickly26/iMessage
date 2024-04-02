@@ -53,6 +53,8 @@ const link =
       )
     : httpLink;
 
+console.log("link", link);
+
 export const client = new ApolloClient({
   link,
   cache: new InMemoryCache(),
