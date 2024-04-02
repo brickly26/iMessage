@@ -76,7 +76,7 @@ async function main() {
   console.log(process.env.CLIENT_ORIGIN);
 
   const corsOptions = {
-    origin: "https://i-message-delta.vercel.app",
+    origin: process.env.CLIENT_ORIGIN,
     credentials: true,
   };
 
@@ -96,7 +96,7 @@ async function main() {
         if (sessionToken) {
           console.log("2");
           const sessionResponse = await fetch(
-            `${"https://i-message-delta.vercel.app"}/api/auth/session`,
+            `${process.env.CLIENT_ORIGIN}/api/auth/session`,
             {
               headers: {
                 Cookie: `next-auth.session-token=${sessionToken}`,
