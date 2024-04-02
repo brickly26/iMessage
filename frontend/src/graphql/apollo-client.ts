@@ -11,10 +11,8 @@ if (typeof apolloUrl !== "string") {
   throw Error("poop");
 }
 
-apolloUrl = "96.250.8.61:4000";
-
 const httpLink = new HttpLink({
-  uri: `http://${apolloUrl}/graphql`,
+  uri: `https://${apolloUrl}/graphql`,
   credentials: "include",
 });
 

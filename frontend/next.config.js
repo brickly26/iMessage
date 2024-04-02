@@ -14,7 +14,7 @@ const nextConfig = {
           { key: "Access-Control-Allow-Credentials", value: "true" },
           {
             key: "Access-Control-Allow-Origin",
-            value: "http://96.250.8.61:4000",
+            value: `https://${process.env.APOLLO_GRAPHQL_SERVER_BASE_URL}`,
           },
           {
             key: "Access-Control-Allow-Methods",
