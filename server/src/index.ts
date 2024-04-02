@@ -75,16 +75,16 @@ async function main() {
 
   console.log(process.env.CLIENT_ORIGIN);
 
-  // const corsOptions = {
-  //   origin: ["https://i-message-delta.vercel.app", "http://localhost:3000"],
-  //   credentials: true,
-  // };
+  const corsOptions = {
+    origin: "https://i-message-delta.vercel.app",
+    credentials: true,
+  };
 
-  // console.log("cors options:", corsOptions);
+  console.log("cors options:", corsOptions);
 
   app.use(
     "/graphql",
-    cors<cors.CorsRequest>(),
+    cors<cors.CorsRequest>(corsOptions),
     json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
@@ -96,7 +96,7 @@ async function main() {
         if (sessionToken) {
           console.log("2");
           const sessionResponse = await fetch(
-            `${process.env.CLIENT_ORIGIN}/api/auth/session`,
+            `${"https://i-message-delta.vercel.app"}/api/auth/session`,
             {
               headers: {
                 Cookie: `next-auth.session-token=${sessionToken}`,

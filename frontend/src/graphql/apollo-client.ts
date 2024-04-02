@@ -11,10 +11,10 @@ if (typeof apolloUrl !== "string") {
   throw Error("poop");
 }
 
-// apolloUrl = "localhost:4000";
+apolloUrl = "localhost:4000";
 
 const httpLink = new HttpLink({
-  uri: `https://${apolloUrl}/graphql`,
+  uri: `http://${apolloUrl}/graphql`,
   credentials: "include",
 });
 
