@@ -89,11 +89,11 @@ async function main() {
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
         const cookies = req?.headers?.cookie;
-        console.log(req);
+        console.log(req?.headers);
 
         const parsedCookies = require("cookie").parse(cookies);
         const sessionToken = parsedCookies["next-auth.session-token"];
-        console.log("1");
+        console.log("1", sessionToken);
 
         if (sessionToken) {
           console.log("2");
@@ -101,7 +101,7 @@ async function main() {
             `${"https://i-message-delta.vercel.app"}/api/auth/session`,
             {
               headers: {
-                Cookie: `next-auth.session-token=${sessionToken}`,
+                cookie: `next-auth.session-token=${sessionToken}`,
               },
             }
           );
