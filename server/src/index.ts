@@ -89,7 +89,7 @@ async function main() {
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
         const cookies = req?.headers?.cookie;
-        console.log(req?.headers);
+        console.log("0", req?.headers);
 
         const parsedCookies = require("cookie").parse(cookies);
         const sessionToken = parsedCookies["next-auth.session-token"];
@@ -106,7 +106,7 @@ async function main() {
             }
           );
 
-          console.log("3");
+          console.log("3", sessionResponse);
 
           const session = (await sessionResponse.json()) as Session;
           console.log("4", session);
