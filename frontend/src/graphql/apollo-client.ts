@@ -24,6 +24,9 @@ console.log(apolloHTTPUrl);
 const httpLink = new HttpLink({
   uri: apolloHTTPUrl,
   credentials: "include",
+  fetchOptions: {
+    mode: "cors",
+  },
 });
 
 const wsLink =
