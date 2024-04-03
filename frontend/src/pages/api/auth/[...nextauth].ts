@@ -34,7 +34,7 @@ export default NextAuth({
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: true,
+        secure: false,
       },
     },
     callbackUrl: {
@@ -42,7 +42,7 @@ export default NextAuth({
       options: {
         sameSite: "lax",
         path: "/",
-        secure: true,
+        secure: false,
       },
     },
     csrfToken: {
@@ -51,7 +51,7 @@ export default NextAuth({
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: true,
+        secure: false,
       },
     },
   },
