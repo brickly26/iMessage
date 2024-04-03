@@ -6,10 +6,10 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export default NextAuth({
-  session: {
-    strategy: "jwt",
-    maxAge: 1000 * 60 * 60 * 24,
-  },
+  // session: {
+  //   strategy: "jwt",
+  //   maxAge: 1000 * 60 * 60 * 24,
+  // },
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
