@@ -37,14 +37,6 @@ export default NextAuth({
         secure: false,
       },
     },
-    callbackUrl: {
-      name: `__Secure-next-auth.callback-url`,
-      options: {
-        sameSite: "lax",
-        path: "/",
-        secure: false,
-      },
-    },
     csrfToken: {
       name: `__Host-next-auth.csrf-token`,
       options: {
