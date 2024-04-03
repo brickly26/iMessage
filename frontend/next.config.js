@@ -2,6 +2,10 @@
 const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
+  env: {
+    APOLLO_HTTP_URL: process.env.APOLLO_HTTP_URL,
+    APOLLO_WS_URL: process.env.APOLLO_WS_URL,
+  },
   async headers() {
     return [
       {

@@ -4,9 +4,12 @@ import { getMainDefinition } from "@apollo/client/utilities";
 import { createClient } from "graphql-ws";
 import { getSession } from "next-auth/react";
 
-let apolloHTTPUrl = process.env.APOLLO_HTTP_URL as string;
+const apolloHTTPUrl = process.env.APOLLO_HTTP_URL as string;
 
 const apolloWSUrl = process.env.APOLLO_WS_URL as string;
+
+console.log("http", apolloHTTPUrl);
+console.log("ws", apolloWSUrl);
 
 const httpLink = new HttpLink({
   uri: apolloHTTPUrl,
