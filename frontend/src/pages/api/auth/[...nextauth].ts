@@ -29,7 +29,7 @@ export default NextAuth({
   },
   cookies: {
     sessionToken: {
-      name: `__Secure-next-auth.session-token`,
+      name: `next-auth.session-token`,
       options: {
         httpOnly: true,
         sameSite: "none",
@@ -38,7 +38,7 @@ export default NextAuth({
       },
     },
     callbackUrl: {
-      name: `__Secure-next-auth.callback-url`,
+      name: `next-auth.callback-url`,
       options: {
         sameSite: "none",
         path: "/",
@@ -46,7 +46,7 @@ export default NextAuth({
       },
     },
     csrfToken: {
-      name: `__Host-next-auth.csrf-token`,
+      name: `next-auth.csrf-token`,
       options: {
         httpOnly: true,
         sameSite: "none",

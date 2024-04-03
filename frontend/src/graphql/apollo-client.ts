@@ -4,22 +4,9 @@ import { getMainDefinition } from "@apollo/client/utilities";
 import { createClient } from "graphql-ws";
 import { getSession } from "next-auth/react";
 
-let apolloUrl = process.env.APOLLO_GRAPHQL_SERVER_BASE_URL as string;
+let apolloHTTPUrl = process.env.APOLLO_HTTP_URL as string;
 
-let apolloHTTPUrl = `https://${apolloUrl}/graphql`;
-
-if (process.env.APOLLO_GRAPHQL_SERVER_BASE_URL === "localhost:4000") {
-  apolloHTTPUrl = `http://${apolloUrl}/graphql`;
-}
-
-const apolloWSUrl = `ws://${apolloUrl}/graphql/subscriptions`;
-
-if (typeof apolloUrl !== "string") {
-  console.log(apolloUrl);
-  throw Error("poop");
-}
-
-console.log(apolloHTTPUrl);
+const apolloWSUrl = process.env.APOLLO_WS_URL as string;
 
 const httpLink = new HttpLink({
   uri: apolloHTTPUrl,
