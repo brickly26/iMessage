@@ -74,14 +74,10 @@ async function main() {
   });
   await server.start();
 
-  console.log(process.env.CLIENT_ORIGIN);
-
   const corsOptions = {
     origin: [process.env.CLIENT_ORIGIN as string, "http://localhost:3000"],
     credentials: true,
   };
-
-  console.log("cors options:", corsOptions);
 
   app.use(
     "/graphql",
