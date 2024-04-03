@@ -31,30 +31,27 @@ export default NextAuth({
     sessionToken: {
       name: `__Secure-next-auth.session-token`,
       options: {
-        httpOnly: true,
-        sameSite: "none",
+        httpOnly: false,
+        sameSite: "lax",
         path: "/",
-        secure: true,
-        domain: `https://imessage.up.railway.app`,
+        secure: false,
       },
     },
     callbackUrl: {
       name: `__Secure-next-auth.callback-url`,
       options: {
-        sameSite: "none",
+        sameSite: "lax",
         path: "/",
-        secure: true,
-        domain: `https://imessage.up.railway.app`,
+        secure: false,
       },
     },
     csrfToken: {
       name: `__Host-next-auth.csrf-token`,
       options: {
-        httpOnly: true,
-        sameSite: "none",
+        httpOnly: false,
+        sameSite: "lax",
         path: "/",
-        secure: true,
-        domain: `https://imessage.up.railway.app`,
+        secure: false,
       },
     },
   },
