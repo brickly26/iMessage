@@ -31,19 +31,27 @@ export default NextAuth({
     sessionToken: {
       name: `__Secure-next-auth.session-token`,
       options: {
-        httpOnly: false,
+        httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: false,
+        secure: true,
+      },
+    },
+    callbackUrl: {
+      name: `__Secure-next-auth.callback-url`,
+      options: {
+        sameSite: "lax",
+        path: "/",
+        secure: true,
       },
     },
     csrfToken: {
       name: `__Host-next-auth.csrf-token`,
       options: {
-        httpOnly: false,
+        httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: false,
+        secure: true,
       },
     },
   },
