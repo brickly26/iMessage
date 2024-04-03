@@ -35,6 +35,7 @@ export default NextAuth({
         sameSite: "none",
         path: "/",
         secure: true,
+        domain: `https://imessage.up.railway.app`,
       },
     },
     callbackUrl: {
@@ -43,6 +44,7 @@ export default NextAuth({
         sameSite: "none",
         path: "/",
         secure: true,
+        domain: `https://imessage.up.railway.app`,
       },
     },
     csrfToken: {
@@ -52,6 +54,7 @@ export default NextAuth({
         sameSite: "none",
         path: "/",
         secure: true,
+        domain: `https://imessage.up.railway.app`,
       },
     },
   },

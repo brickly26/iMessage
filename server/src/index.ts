@@ -75,7 +75,7 @@ async function main() {
   await server.start();
 
   const corsOptions = {
-    origin: [process.env.CLIENT_ORIGIN as string, "http://localhost:3000"],
+    origin: process.env.CLIENT_ORIGIN as string,
     credentials: true,
   };
 
