@@ -97,6 +97,7 @@ async function main() {
         "X-Api-Version",
         "Cookie",
       ],
+      exposedHeaders: ["Cookie"],
     })
   );
 
