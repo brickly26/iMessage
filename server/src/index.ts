@@ -52,6 +52,10 @@ async function main() {
     },
     wsServer
   );
+  const corsOptions: cors.CorsOptions = {
+    origin: process.env.CLIENT_ORIGIN as string,
+    credentials: true,
+  };
 
   const server = new ApolloServer({
     schema,
@@ -74,14 +78,10 @@ async function main() {
   });
   await server.start();
 
-  const corsOptions = {
-    origin: process.env.CLIENT_ORIGIN as string,
-    credentials: true,
-  };
+  app.use("/graphql", cors(corsOptions));
 
   app.use(
     "/graphql",
-    cors<cors.CorsRequest>({ origin: "*", credentials: true }),
     json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
