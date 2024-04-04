@@ -81,7 +81,7 @@ async function main() {
 
   app.use(
     "/graphql",
-    cors<cors.CorsRequest>(corsOptions),
+    cors<cors.CorsRequest>(),
     json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
