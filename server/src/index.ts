@@ -14,7 +14,6 @@ import { PrismaClient } from "@prisma/client";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 import { PubSub } from "graphql-subscriptions";
-import { getSession } from "next-auth/react";
 
 async function main() {
   dotenv.config();
@@ -78,6 +77,8 @@ async function main() {
     origin: process.env.CLIENT_ORIGIN as string,
     credentials: true,
   };
+
+  console.log("url", process.env.CLIENT_ORIGIN);
 
   app.use(
     cors({
