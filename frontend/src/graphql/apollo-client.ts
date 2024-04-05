@@ -4,16 +4,19 @@ import { getMainDefinition } from "@apollo/client/utilities";
 import { createClient } from "graphql-ws";
 import { getSession } from "next-auth/react";
 
-const apolloHTTPUrl = process.env.APOLLO_HTTP_URL as string;
+let apolloHTTPUrl = process.env.APOLLO_HTTP_URL as string;
 
-const apolloWSUrl = process.env.APOLLO_WS_URL as string;
+apolloHTTPUrl = "/api/graphql";
+
+let apolloWSUrl = process.env.APOLLO_WS_URL as string;
+
+apolloWSUrl = "ws://localhost:3000/api/graphql/subscriptions";
 
 console.log("http", apolloHTTPUrl);
 console.log("ws", apolloWSUrl);
 
 const httpLink = new HttpLink({
   uri: apolloHTTPUrl,
-  credentials: "include",
 });
 
 const wsLink =
@@ -48,4 +51,5 @@ console.log("link", link);
 export const client = new ApolloClient({
   link,
   cache: new InMemoryCache(),
+  credentials: "include",
 });
