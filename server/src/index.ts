@@ -81,28 +81,8 @@ async function main() {
   console.log("url", process.env.CLIENT_ORIGIN);
 
   app.use(
-    cors({
-      origin: process.env.CLIENT_ORIGIN as string,
-      credentials: true,
-      methods: ["POST", "GET", "DELETE", "PUT", "OPTIONS", "PATCH"],
-      allowedHeaders: [
-        "X-CSRF-Token",
-        "X-Requested-With",
-        "Accept",
-        "Accept-Version",
-        "Content-Length",
-        "Content-MD5",
-        "Content-Type",
-        "Date",
-        "X-Api-Version",
-        "Cookie",
-      ],
-      exposedHeaders: ["Cookie"],
-    })
-  );
-
-  app.use(
     "/graphql",
+    cors(corsOptions),
     json(),
     expressMiddleware(server, {
       context: async ({ req }): Promise<GraphQLContext> => {
