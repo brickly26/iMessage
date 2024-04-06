@@ -19,7 +19,7 @@ const httpServer = http.createServer(app);
 // Create our WebSocket server using the HTTP server we just set up.
 const wsServer = new WebSocketServer({
   server: httpServer,
-  path: "/api/graphql/subscriptions",
+  path: "/subscriptions",
 });
 
 const schema = makeExecutableSchema({
