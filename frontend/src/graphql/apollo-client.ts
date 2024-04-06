@@ -6,11 +6,7 @@ import { getSession } from "next-auth/react";
 
 let apolloHTTPUrl = process.env.APOLLO_HTTP_URL as string;
 
-apolloHTTPUrl = "http://localhost:4000/graphql";
-
 let apolloWSUrl = process.env.APOLLO_WS_URL as string;
-
-apolloWSUrl = "ws://localhost:4000/graphql/subscriptions";
 
 console.log("http", apolloHTTPUrl);
 console.log("ws", apolloWSUrl);
