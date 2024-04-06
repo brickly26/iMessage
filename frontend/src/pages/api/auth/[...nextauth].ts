@@ -7,8 +7,6 @@ const hostName = new URL(process.env.NEXTAUTH_URL as string).hostname;
 
 const prisma = new PrismaClient();
 
-console.log("." + hostName);
-
 export default NextAuth({
   // session: {
   //   strategy: "jwt",
@@ -39,7 +37,7 @@ export default NextAuth({
         sameSite: "none",
         path: "/",
         secure: true,
-        domain: [hostName, "imessage.up.railway.app"],
+        domain: ["i-message-delta.vercel.app", "imessage.up.railway.app"],
       },
     },
   },
