@@ -3,15 +3,11 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 
-const useSecureCookies = (process.env.NEXTAUTH_URL as string).startsWith(
-  "https://"
-);
-const cookiePrefix = useSecureCookies ? "__Secure-" : "";
 const hostName = new URL(process.env.NEXTAUTH_URL as string).hostname;
 
 const prisma = new PrismaClient();
 
-console.log("1", "." + hostName);
+console.log("." + hostName);
 
 export default NextAuth({
   // session: {
@@ -37,13 +33,13 @@ export default NextAuth({
   },
   cookies: {
     sessionToken: {
-      name: `${cookiePrefix}next-auth.session-token`,
+      name: `next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none",
         path: "/",
-        domain: "imessage.up.railway.app",
-        secure: useSecureCookies,
+        secure: true,
+        domain: "." + hostName,
       },
     },
   },
