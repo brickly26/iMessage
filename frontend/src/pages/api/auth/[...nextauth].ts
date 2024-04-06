@@ -39,7 +39,7 @@ export default NextAuth({
         sameSite: "none",
         path: "/",
         secure: true,
-        domain: "." + hostName,
+        domain: [hostName, "imessage.up.railway.app"],
       },
     },
   },
