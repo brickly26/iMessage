@@ -37,7 +37,6 @@ export default NextAuth({
         sameSite: "none",
         path: "/",
         secure: true,
-        domain: ["i-message-delta.vercel.app", "imessage.up.railway.app"],
       },
     },
   },
