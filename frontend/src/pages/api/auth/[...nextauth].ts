@@ -42,7 +42,7 @@ export default NextAuth({
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        domain: "." + hostName,
+        domain: ["." + hostName, ".vercel.app", ".railway.app"],
         secure: useSecureCookies,
       },
     },
