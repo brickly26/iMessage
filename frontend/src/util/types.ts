@@ -24,7 +24,6 @@ export const messagePopulated = Prisma.validator<Prisma.MessageInclude>()({
     select: {
       id: true,
       username: true,
-      image: true,
     },
   },
 });
@@ -73,14 +72,12 @@ export interface SearchFriendsVariables {
 export interface SearchedUser {
   id: string;
   username: string;
-  image: string;
   friendshipStatus: string;
 }
 
 export interface SearchedFriend {
   id: string;
   username: string;
-  image: string;
 }
 
 export interface FriendRequest {
@@ -92,7 +89,6 @@ export interface FriendRequest {
   sender: {
     id: string;
     username: string;
-    image: string;
   };
 }
 
@@ -147,7 +143,6 @@ export interface ConversationData {
       user: {
         id: string;
         username: string;
-        image: string;
         friendshipStatus: string;
       };
     }>;
@@ -202,7 +197,6 @@ export interface MessageIsFriend {
   sender: {
     id: string;
     username: string;
-    image: string;
     friendshipStatus: string;
   };
 }
@@ -263,7 +257,6 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  image: string;
   canSendRequest: boolean;
 }
 
@@ -271,7 +264,6 @@ export interface Friend {
   id: string;
   username: string;
   email: string;
-  image: string;
 }
 
 export interface CreateUsernameResponse {

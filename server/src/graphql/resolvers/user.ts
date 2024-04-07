@@ -9,6 +9,7 @@ import {
   GraphQLContext,
   SendFriendRequestSubscriptionPayload,
 } from "../../util/types";
+import bcrypt from "bcrypt";
 
 const resolvers = {
   Query: {
@@ -173,6 +174,68 @@ const resolvers = {
     },
   },
   Mutation: {
+    register: async (
+      _: any,
+      args: { username: string; password: string },
+      context: GraphQLContext
+    ): Promise<User> => {
+      const { username, password } = args;
+      const { prisma } = context;
+
+      if (username.length <= 3) {
+        throw new GraphQLError("Username too short.");
+      }
+
+      if (password.length < 8) {
+        throw new GraphQLError("Password must be at least 8 characters");
+      }
+
+      try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await prisma.user.create({
+          data: {
+            username,
+            password: hashedPassword,
+          },
+        });
+
+        return user;
+      } catch (error: any) {
+        console.log("register error", error);
+        throw new GraphQLError(error?.message);
+      }
+    },
+    login: async (
+      _: any,
+      args: { username: string; password: string },
+      context: GraphQLContext
+    ): Promise<User> => {
+      const { username, password } = args;
+      const { prisma } = context;
+
+      try {
+        const user = await prisma.user.findFirst({
+          where: {
+            username,
+          },
+        });
+
+        if (!user) {
+          throw new GraphQLError("Invaild credentials");
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        if (user.password !== hashedPassword) {
+          throw new GraphQLError("Invaild credentials");
+        }
+
+        return user;
+      } catch (error: any) {
+        console.log("register error", error);
+        throw new GraphQLError(error?.message);
+      }
+    },
     createUsername: async (
       _: any,
       args: { username: string },
@@ -529,7 +592,6 @@ export const friendRequestPopulated =
       select: {
         id: true,
         username: true,
-        image: true,
       },
     },
   });

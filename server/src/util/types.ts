@@ -38,15 +38,13 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  image: string;
-  canSendRequest: boolean;
+  canSendRequest?: boolean;
 }
 
 export interface Friend {
   id: string;
   username: string;
   email: string;
-  image: string;
 }
 
 export interface CreateUsernameResponse {

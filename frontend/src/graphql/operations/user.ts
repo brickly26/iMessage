@@ -7,7 +7,6 @@ const friendRequestFields = `
   sender {
     id
     username
-    image
   }
 `;
 
@@ -18,7 +17,6 @@ const userOperations = {
         searchUsers(username: $username) {
           id
           username
-          image
           friendshipStatus
         }
       }
@@ -28,7 +26,6 @@ const userOperations = {
         searchFriends(username: $username) {
           id
           username
-          image
         }
       }
     `,
@@ -41,6 +38,14 @@ const userOperations = {
     `,
   },
   Mutation: {
+    login: gql`
+      mutation Login($username: String!, $password: String!) {
+        login(username: $username, password: $password) {
+          id
+          username
+        }
+      }
+    `,
     createUsername: gql`
       mutation CreateUsername($username: String!) {
         createUsername(username: $username) {

@@ -14,11 +14,22 @@ import { PrismaClient } from "@prisma/client";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 import { PubSub } from "graphql-subscriptions";
+import RedisStore from "connect-redis";
+import session from "express-session";
+import { createClient } from "redis";
 
 async function main() {
   dotenv.config();
   const app = express();
   const httpServer = http.createServer(app);
+
+  let redisClient = createClient();
+  redisClient.connect().catch(console.error);
+
+  let redisStore = new RedisStore({
+    disableTouch: true,
+    client: redisClient,
+  });
 
   // Create our WebSocket server using the HTTP server we just set up.
   const wsServer = new WebSocketServer({
@@ -79,6 +90,22 @@ async function main() {
   };
 
   console.log("url", process.env.CLIENT_ORIGIN);
+
+  app.use(
+    session({
+      name: "auth",
+      store: redisStore,
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false, // TODO: change to true when deploying
+      },
+      resave: false,
+      saveUninitialized: false, // recommended: only save session when data exists
+      secret: "fdshgjfdsgjkaeuiowqtrbfc",
+    })
+  );
 
   app.use(
     "/graphql",
