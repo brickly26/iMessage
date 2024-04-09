@@ -105,7 +105,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
             borderRadius={4}
           >
             <Avatar />
-            {/* <Avatar src={participant.user.image} /> */}
             <Flex justify="space-between" align="center" width="100%" gap={5}>
               <Text color="whiteAlpha.700">{message.sender.username}</Text>
               <Button

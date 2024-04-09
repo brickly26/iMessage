@@ -7,8 +7,10 @@ import {
   DeclineFriendRequestSubscriptionPayload,
   FriendRequestPopulated,
   GraphQLContext,
+  GraphQLWSContext,
   SendFriendRequestSubscriptionPayload,
-} from "../../util/types";
+} from "../../utils/types";
+import bcrypt from "bcrypt";
 
 const resolvers = {
   Query: {
@@ -18,15 +20,13 @@ const resolvers = {
       context: GraphQLContext
     ): Promise<Array<User>> => {
       const { username: searchedUsername } = args;
-      const { session, prisma } = context;
+      const { req, prisma } = context;
 
-      if (!session?.user) {
+      if (!req.session?.userId) {
         throw new GraphQLError("Not authorized");
       }
 
-      const {
-        user: { username: myUsername, id: userId },
-      } = session;
+      const { userId, username: myUsername } = req.session;
 
       try {
         const searchedUsers = await prisma.user.findMany({
@@ -96,16 +96,14 @@ const resolvers = {
       args: { username: string },
       context: GraphQLContext
     ): Promise<Array<User>> => {
-      const { prisma, session } = context;
+      const { prisma, req } = context;
       const { username } = args;
 
-      if (!session?.user) {
+      if (!req.session?.userId) {
         throw new GraphQLError("Not authorized");
       }
 
-      const {
-        user: { username: myUsername, id: userId },
-      } = session;
+      const { userId, username: myUsername } = req.session;
 
       try {
         const users = await prisma.user.findMany({
@@ -132,15 +130,13 @@ const resolvers = {
       __: any,
       context: GraphQLContext
     ): Promise<Array<FriendRequestPopulated>> => {
-      const { prisma, session } = context;
+      const { prisma, req } = context;
 
-      if (!session?.user) {
+      if (!req.session?.userId) {
         throw new GraphQLError("Not authorized");
       }
 
-      const {
-        user: { id: userId },
-      } = session;
+      const { userId } = req.session;
 
       try {
         const user = await prisma.user.findUnique({
@@ -171,23 +167,162 @@ const resolvers = {
         throw new GraphQLError(error?.message);
       }
     },
+    me: async (
+      _: any,
+      __: any,
+      context: GraphQLContext
+    ): Promise<User | null> => {
+      const { prisma, req } = context;
+
+      console.log(req.session);
+
+      if (!req?.session.userId) {
+        return null;
+      }
+
+      console.log(req.session.userId);
+
+      try {
+        const user = await prisma.user.findFirst({
+          where: {
+            id: req.session.userId,
+          },
+        });
+
+        return user;
+      } catch (error: any) {
+        console.log("searchFriends Error", error);
+        throw new GraphQLError(error?.message);
+      }
+    },
   },
   Mutation: {
+    register: async (
+      _: any,
+      args: { username: string; password: string },
+      context: GraphQLContext
+    ): Promise<User> => {
+      const { username, password } = args;
+      const { prisma, req } = context;
+
+      if (!req) {
+        throw new GraphQLError("req doesnt exist");
+      }
+
+      if (username.length <= 3) {
+        throw new GraphQLError("Username too short.");
+      }
+
+      if (password.length < 8) {
+        throw new GraphQLError("Password must be at least 8 characters");
+      }
+
+      try {
+        const existingUser = await prisma.user.findUnique({
+          where: {
+            username,
+          },
+        });
+
+        if (existingUser) {
+          throw new GraphQLError("Username already exists");
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await prisma.user.create({
+          data: {
+            username,
+            password: hashedPassword,
+          },
+        });
+
+        req.session.userId = user.id;
+        req.session.username = user.username;
+
+        return user;
+      } catch (error: any) {
+        console.log("register error", error);
+        throw new GraphQLError(error?.message);
+      }
+    },
+    login: async (
+      _: any,
+      args: { username: string; password: string },
+      context: GraphQLContext
+    ): Promise<User> => {
+      const { username, password } = args;
+      const { prisma, req } = context;
+
+      if (!req) {
+        throw new GraphQLError("req doesnt exist");
+      }
+
+      try {
+        const user = await prisma.user.findFirst({
+          where: {
+            username,
+          },
+        });
+
+        if (!user) {
+          throw new GraphQLError("Invaild credentials");
+        }
+
+        const passwordIsCorrect = await bcrypt.compare(password, user.password);
+
+        console.log(passwordIsCorrect);
+        console.log(user.password);
+
+        if (!passwordIsCorrect) {
+          throw new GraphQLError("Invaild credentials");
+        }
+
+        req.session.userId = user.id;
+        req.session.username = user.username;
+
+        return user;
+      } catch (error: any) {
+        console.log("register error", error);
+        throw new GraphQLError(error?.message);
+      }
+    },
+    signOut: async (
+      _: any,
+      __: any,
+      context: GraphQLContext
+    ): Promise<boolean> => {
+      const { req, res } = context;
+
+      if (!req.session.userId) {
+        throw new GraphQLError("session doesnt exist");
+      }
+
+      return new Promise((resolve) =>
+        req.session.destroy((err) => {
+          res.clearCookie("auth");
+          if (err) {
+            console.log(err);
+            resolve(false);
+            return;
+          }
+
+          resolve(true);
+        })
+      );
+    },
     createUsername: async (
       _: any,
       args: { username: string },
       context: GraphQLContext
     ): Promise<CreateUsernameResponse> => {
       const { username } = args;
-      const { session, prisma } = context;
+      const { req, prisma } = context;
 
-      if (!session?.user) {
-        return {
-          error: "Not authorized",
-        };
+      if (!req.session?.userId) {
+        throw new GraphQLError("Not authorized");
       }
 
-      const { id: userId } = session.user;
+      const { userId } = req.session;
 
       try {
         // Check to see if username is not taken
@@ -226,16 +361,14 @@ const resolvers = {
       args: { userId: string },
       context: GraphQLContext
     ): Promise<boolean> => {
-      const { session, prisma, pubsub } = context;
+      const { req, prisma, pubsub } = context;
       const { userId } = args;
 
-      if (!session?.user) {
+      if (!req.session?.userId) {
         throw new GraphQLError("Not authorized");
       }
 
-      const {
-        user: { id: senderId },
-      } = session;
+      const { userId: senderId } = req.session;
 
       try {
         const alreadyreceivedRequestFromUser =
@@ -338,16 +471,14 @@ const resolvers = {
       args: { requestId: string; choice: string },
       context: GraphQLContext
     ): Promise<boolean> => {
-      const { session, prisma, pubsub } = context;
+      const { req, prisma, pubsub } = context;
       const { requestId, choice } = args;
 
-      if (!session?.user) {
+      if (!req.session?.userId) {
         throw new GraphQLError("Not authorized");
       }
 
-      const {
-        user: { id: userId },
-      } = session;
+      const { userId } = req.session;
 
       try {
         const friendRequest = await prisma.friendRequest.findFirst({
@@ -451,22 +582,22 @@ const resolvers = {
   Subscription: {
     sendFriendRequest: {
       subscribe: withFilter(
-        (_: any, __: any, context: GraphQLContext) => {
+        (_: any, __: any, context: GraphQLWSContext) => {
           const { pubsub } = context;
           return pubsub.asyncIterator(["SEND_FRIEND_REQUEST"]);
         },
         (
           payload: SendFriendRequestSubscriptionPayload,
           _: any,
-          context: GraphQLContext
+          context: GraphQLWSContext
         ) => {
           const { session } = context;
 
-          if (!session?.user) {
+          if (!session?.userId) {
             throw new GraphQLError("Not Authorized");
           }
 
-          const { id: userId } = session.user;
+          const { userId } = session;
           const { senderId, receiverId } = payload.sendFriendRequest;
 
           return userId === senderId || userId === receiverId;
@@ -475,20 +606,22 @@ const resolvers = {
     },
     acceptFriendRequest: {
       subscribe: withFilter(
-        (_: any, __: any, context: GraphQLContext) => {
+        (_: any, __: any, context: GraphQLWSContext) => {
           const { pubsub } = context;
           return pubsub.asyncIterator(["ACCEPT_FRIEND_REQUEST"]);
         },
         (
           payload: AcceptFriendRequestSubscriptionPayload,
           _: any,
-          context: GraphQLContext
+          context: GraphQLWSContext
         ) => {
           const { session } = context;
-          if (!session?.user) {
+
+          if (!session?.userId) {
+            console.log(session);
             throw new GraphQLError("Not Authorized");
           }
-          const { id: userId } = session.user;
+          const { userId } = session;
           const { senderId, receiverId } = payload.acceptFriendRequest;
           return userId === senderId || userId === receiverId;
         }
@@ -496,20 +629,20 @@ const resolvers = {
     },
     declineFriendRequest: {
       subscribe: withFilter(
-        (_: any, __: any, context: GraphQLContext) => {
+        (_: any, __: any, context: GraphQLWSContext) => {
           const { pubsub } = context;
           return pubsub.asyncIterator(["DECLINE_FRIEND_REQUEST"]);
         },
         (
           payload: DeclineFriendRequestSubscriptionPayload,
           _: any,
-          context: GraphQLContext
+          context: GraphQLWSContext
         ) => {
           const { session } = context;
-          if (!session?.user) {
+          if (!session?.userId) {
             throw new GraphQLError("Not Authorized");
           }
-          const { id: userId } = session.user;
+          const { userId } = session;
           const { senderId, receiverId } = payload.declineFriendRequest;
           return userId === senderId || userId === receiverId;
         }
@@ -529,7 +662,6 @@ export const friendRequestPopulated =
       select: {
         id: true,
         username: true,
-        image: true,
       },
     },
   });

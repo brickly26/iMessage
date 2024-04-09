@@ -37,7 +37,7 @@ const FriendRequestList: React.FC<FriendRequestListProps> = ({
                 borderRadius={4}
                 _hover={{ bg: "whiteAlpha.100" }}
               >
-                <Avatar src={friendRequest.sender.image} />
+                <Avatar />
                 <Flex justify="space-between" align="center" width="100%">
                   <Text color="whiteAlpha.700">
                     {friendRequest.sender.username}

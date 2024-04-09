@@ -3,7 +3,7 @@ import { Button, ModalBody, Stack, Input } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import UserSearchList from "./UserSearchList";
 import toast from "react-hot-toast";
-import { Session } from "next-auth";
+
 import { useRouter } from "next/router";
 import userOperations from "../../../../graphql/operations/user";
 import {
@@ -14,18 +14,17 @@ import {
   SearchUsersData,
   SearchUsersVariables,
   SearchedUser,
+  User,
 } from "../../../../util/types";
 
 interface AddFriendProps {
-  session: Session;
+  user: User;
 }
 
-const AddFriend: React.FC<AddFriendProps> = ({ session }) => {
+const AddFriend: React.FC<AddFriendProps> = ({ user }) => {
   const [username, setUsername] = useState("");
 
-  const {
-    user: { id: userId },
-  } = session;
+  const { id: userId } = user;
 
   const router = useRouter();
 

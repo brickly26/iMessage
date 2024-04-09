@@ -4,7 +4,6 @@ const typeDefs = gql`
   type User {
     id: String
     username: String
-    image: String
     friendshipStatus: String
   }
 
@@ -19,7 +18,6 @@ const typeDefs = gql`
   type SearchedFriend {
     id: String
     username: String
-    image: String
   }
 
   type Query {
@@ -32,6 +30,22 @@ const typeDefs = gql`
 
   type Query {
     friendRequests: [FriendRequest]
+  }
+
+  type Query {
+    me: User
+  }
+
+  type Mutation {
+    register(username: String!, password: String!): User
+  }
+
+  type Mutation {
+    login(username: String!, password: String!): User
+  }
+
+  type Mutation {
+    signOut: Boolean
   }
 
   type Mutation {

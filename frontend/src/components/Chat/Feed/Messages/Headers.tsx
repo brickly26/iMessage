@@ -160,7 +160,6 @@ const MessagesHeader: React.FC<MessagesHeaderProps> = ({
                       borderRadius={4}
                     >
                       <Avatar />
-                      {/* <Avatar src={participant.user.image} /> */}
                       <Flex
                         justify="space-between"
                         align="center"

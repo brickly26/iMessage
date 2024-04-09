@@ -1,5 +1,5 @@
 import { Box } from "@chakra-ui/react";
-import { Session } from "next-auth";
+
 import ConversationList from "./ConversationList";
 import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
 import conversationOperations from "../../../graphql/operations/conversation";
@@ -10,6 +10,7 @@ import {
   ConversationsData,
   MessagesData,
   ParticipantPopulated,
+  User,
 } from "../../../util/types";
 import { useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
@@ -18,19 +19,18 @@ import messageOperations from "../../../graphql/operations/message";
 import toast from "react-hot-toast";
 
 interface ConversationsWrapperProps {
-  session: Session;
+  user: User;
 }
 
 const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
-  session,
+  user,
 }) => {
   const router = useRouter();
   const {
     query: { conversationId },
   } = router;
-  const {
-    user: { id: userId },
-  } = session;
+
+  const { id: userId } = user;
 
   const {
     data: conversationsData,
@@ -330,7 +330,7 @@ const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
         <SkeletonLoader count={7} height="80px" width="270px" />
       ) : (
         <ConversationList
-          session={session}
+          user={user}
           conversations={conversationsData?.conversations || []}
           onViewConversation={onViewConversation}
         />

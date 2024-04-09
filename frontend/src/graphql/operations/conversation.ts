@@ -7,7 +7,6 @@ const ConversationFields = `
       user {
         id
         username
-        image
       }
       hasSeenLatestMessage
     }
@@ -27,7 +26,6 @@ const conversationOperations = {
             user {
               id
               username
-              image
               friendshipStatus
             }
           }

@@ -1,6 +1,5 @@
 import { useMutation } from "@apollo/client";
 import { Box, Input } from "@chakra-ui/react";
-import { Session } from "next-auth";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import messageOperations from "../../../../graphql/operations/message";
@@ -8,16 +7,17 @@ import {
   MessagesData,
   SendMessageData,
   SendMessageVariables,
+  User,
 } from "../../../../util/types";
 import { ObjectID } from "bson";
 
 interface MessageInputProps {
-  session: Session;
+  user: User;
   conversationId: string;
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({
-  session,
+  user,
   conversationId,
 }) => {
   const [messageBody, setMessageBody] = useState("");
@@ -31,7 +31,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
     try {
       // Call sendMessage  mutation
-      const { id: senderId } = session.user;
+      const { id: senderId } = user;
       const messageId = new ObjectID().toString();
       const newMessage: SendMessageVariables = {
         id: messageId,
@@ -62,12 +62,11 @@ const MessageInput: React.FC<MessageInputProps> = ({
                 {
                   id: messageId,
                   body: messageBody,
-                  senderId: session.user.id,
+                  senderId: user.id,
                   conversationId,
                   sender: {
-                    id: session.user.id,
-                    username: session.user.username,
-                    image: session.user.image,
+                    id: user.id,
+                    username: user.username,
                     friendshipStatus: "ACCEPTED",
                   },
                   createdAt: new Date(Date.now()),

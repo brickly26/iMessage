@@ -13,27 +13,25 @@ import {
 import { useEffect, useState } from "react";
 import UserSearchList from "./UserSearchList";
 import toast from "react-hot-toast";
-import { Session } from "next-auth";
+
 import { useRouter } from "next/router";
 import userOperations from "../../../../graphql/operations/user";
-import { SearchUsersData, SearchUsersVariables } from "../../../../util/types";
+import {
+  SearchUsersData,
+  SearchUsersVariables,
+  User,
+} from "../../../../util/types";
 
 interface FriendModalProps {
-  session: Session;
+  user: User;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const FriendModal: React.FC<FriendModalProps> = ({
-  session,
-  isOpen,
-  onClose,
-}) => {
+const FriendModal: React.FC<FriendModalProps> = ({ user, isOpen, onClose }) => {
   const [username, setUsername] = useState("");
 
-  const {
-    user: { id: userId },
-  } = session;
+  const { id: userId } = user;
 
   const [
     searchUsers,

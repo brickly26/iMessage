@@ -8,20 +8,28 @@ import {
 import { Context } from "graphql-ws/lib/server";
 import { PubSub } from "graphql-subscriptions";
 import { friendRequestPopulated } from "../graphql/resolvers/user";
+import { Response, Request } from "express";
 
 /**
  * Server Configuration
  */
 
 export interface GraphQLContext {
-  session: Session | null;
+  prisma: PrismaClient;
+  pubsub: PubSub;
+  req: Request & { session: { userId?: string; username?: string } };
+  res: Response;
+}
+
+export interface GraphQLWSContext {
+  session: { userId: string } | null;
   prisma: PrismaClient;
   pubsub: PubSub;
 }
 
 export interface SubscriptionContext extends Context {
   connectionParams: {
-    session?: Session;
+    cookies?: string;
   };
 }
 
@@ -38,15 +46,13 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  image: string;
-  canSendRequest: boolean;
+  canSendRequest?: boolean;
 }
 
 export interface Friend {
   id: string;
   username: string;
   email: string;
-  image: string;
 }
 
 export interface CreateUsernameResponse {
