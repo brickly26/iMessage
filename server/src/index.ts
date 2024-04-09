@@ -9,7 +9,11 @@ import resolvers from "./graphql/resolvers";
 import * as dotenv from "dotenv";
 import cors from "cors";
 import { json } from "body-parser";
-import { GraphQLContext, Session, SubscriptionContext } from "./util/types";
+import {
+  GraphQLContext,
+  GraphQLWSContext,
+  SubscriptionContext,
+} from "./utils/types";
 import { PrismaClient } from "@prisma/client";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
@@ -17,6 +21,9 @@ import { PubSub } from "graphql-subscriptions";
 import RedisStore from "connect-redis";
 import session from "express-session";
 import { createClient } from "redis";
+import { v4 as uuidv4 } from "uuid";
+import cookieParser from "cookie-parser";
+import cookie from "cookie";
 
 async function main() {
   dotenv.config();
@@ -30,6 +37,34 @@ async function main() {
     disableTouch: true,
     client: redisClient,
   });
+
+  const corsOptions: cors.CorsOptions = {
+    origin: process.env.CLIENT_ORIGIN as string,
+    credentials: true,
+  };
+
+  console.log("url", process.env.CLIENT_ORIGIN);
+
+  app.use(cors(corsOptions));
+  app.use(json());
+  app.use(
+    session({
+      name: "auth",
+      store: redisStore,
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: false,
+        sameSite: "lax",
+        secure: false, // TODO: change to true when deploying
+      },
+      genid: function (req) {
+        return uuidv4(); // use UUIDs for session IDs
+      },
+      resave: false,
+      saveUninitialized: false,
+      secret: "fdshgjfdsgjkaeuiowqtrbfc",
+    })
+  );
 
   // Create our WebSocket server using the HTTP server we just set up.
   const wsServer = new WebSocketServer({
@@ -50,9 +85,38 @@ async function main() {
   const serverCleanup = useServer(
     {
       schema,
-      context: async (ctx: SubscriptionContext): Promise<GraphQLContext> => {
-        if (ctx.connectionParams && ctx.connectionParams.session) {
-          const { session } = ctx.connectionParams;
+      context: async (ctx: SubscriptionContext): Promise<GraphQLWSContext> => {
+        if (ctx.connectionParams && ctx.connectionParams.cookies) {
+          const { cookies } = ctx.connectionParams;
+
+          console.log("cookies", cookies);
+
+          const parsedCookie1 = cookie.parse(cookies);
+
+          console.log(parsedCookie1);
+
+          const parsedCookies = cookieParser.signedCookie(
+            parsedCookie1.auth,
+            "fdshgjfdsgjkaeuiowqtrbfc"
+          );
+
+          let session = null;
+
+          if (!parsedCookies) {
+            return { session, prisma, pubsub };
+          }
+
+          console.log("sessionID", parsedCookies);
+
+          await redisStore.get(parsedCookies, (err, cookieData) => {
+            if (err) throw err;
+
+            console.log(cookieData);
+
+            session = { userId: cookieData.userId };
+          });
+
+          console.log(session);
 
           return { session, prisma, pubsub };
         }
@@ -84,65 +148,16 @@ async function main() {
   });
   await server.start();
 
-  const corsOptions: cors.CorsOptions = {
-    origin: process.env.CLIENT_ORIGIN as string,
-    credentials: true,
-  };
-
-  console.log("url", process.env.CLIENT_ORIGIN);
-
-  app.use(
-    session({
-      name: "auth",
-      store: redisStore,
-      cookie: {
-        maxAge: 1000 * 60 * 60 * 24,
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false, // TODO: change to true when deploying
-      },
-      resave: false,
-      saveUninitialized: false, // recommended: only save session when data exists
-      secret: "fdshgjfdsgjkaeuiowqtrbfc",
-    })
-  );
-
   app.use(
     "/graphql",
-    cors(corsOptions),
-    json(),
     expressMiddleware(server, {
-      context: async ({ req }): Promise<GraphQLContext> => {
-        const cookies = req?.headers?.cookie;
-        console.log(cookies);
-        console.log("0", req?.headers);
-
-        const parsedCookies = require("cookie").parse(cookies);
-        console.log("1");
-        const sessionToken = parsedCookies["next-auth.session-token"];
-        console.log("1", sessionToken);
-
-        if (sessionToken) {
-          console.log("2");
-          const sessionResponse = await fetch(
-            `${process.env.CLIENT_ORIGIN}/api/auth/session`,
-            {
-              headers: {
-                Cookie: `next-auth.session-token=${sessionToken}`,
-              },
-            }
-          );
-
-          const session = (await sessionResponse.json()) as Session;
-          console.log("4", session);
-          return {
-            session,
-            prisma,
-            pubsub,
-          };
-        } else {
-          return { session: null, prisma, pubsub };
-        }
+      context: async ({ req, res }): Promise<GraphQLContext> => {
+        return {
+          prisma,
+          pubsub,
+          res,
+          req,
+        };
       },
     })
   );

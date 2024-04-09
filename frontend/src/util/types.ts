@@ -1,9 +1,13 @@
-import { Prisma, PrismaClient } from "@prisma/client";
-import { ISODateString } from "next-auth";
+import { Prisma } from "@prisma/client";
 
-import { Context } from "graphql-ws/lib/server";
-import { PubSub } from "graphql-subscriptions";
-import { friendRequestPopulated } from "../graphql/resolvers/user";
+export interface Session {
+  user: User;
+}
+
+export interface User {
+  id: string;
+  username: string;
+}
 
 /**
  * Prisma validator for conversation and participants
@@ -42,15 +46,28 @@ export const conversationPopulated =
  * USER TYPES
  */
 
-export interface CreateUsernameData {
-  createUsername: {
-    success: boolean;
-    error: string;
+export interface LoginData {
+  login: {
+    id: string;
+    username: string;
   };
 }
 
-export interface CreateUsernameVariables {
+export interface LoginVariables {
   username: string;
+  password: string;
+}
+
+export interface RegisterData {
+  register: {
+    id: string;
+    username: string;
+  };
+}
+
+export interface RegisterVariables {
+  username: string;
+  password: string;
 }
 
 export interface SearchUsersData {
@@ -179,6 +196,10 @@ export interface ConversationDeletedData {
   };
 }
 
+export type ConversationPopulated = Prisma.ConversationGetPayload<{
+  include: typeof conversationPopulated;
+}>;
+
 /**
  * Messages
  */
@@ -226,113 +247,4 @@ export interface MessageSubscriptionData {
       messageSent: MessagePopulated;
     };
   };
-}
-
-/**
- * Server Configuration
- */
-
-export interface GraphQLContext {
-  session: Session | null;
-  prisma: PrismaClient;
-  pubsub: PubSub;
-}
-
-export interface SubscriptionContext extends Context {
-  connectionParams: {
-    session?: Session;
-  };
-}
-
-export interface Session {
-  user?: User;
-  expires: ISODateString;
-}
-
-/**
- * Users
- */
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  canSendRequest: boolean;
-}
-
-export interface Friend {
-  id: string;
-  username: string;
-  email: string;
-}
-
-export interface CreateUsernameResponse {
-  success?: boolean;
-  error?: string;
-}
-
-export interface FriendRequest {
-  id: string;
-  senderId: string;
-  receiverId: string;
-  status: string;
-}
-
-export type FriendRequestPopulated = Prisma.FriendRequestGetPayload<{
-  select: typeof friendRequestPopulated;
-}>;
-
-export interface SendFriendRequestSubscriptionPayload {
-  sendFriendRequest: FriendRequestPopulated;
-}
-
-export interface AcceptFriendRequestSubscriptionPayload {
-  acceptFriendRequest: FriendRequestPopulated;
-}
-
-export interface DeclineFriendRequestSubscriptionPayload {
-  declineFriendRequest: FriendRequestPopulated;
-}
-
-/**
- * Conversations
- */
-
-export type ConversationPopulated = Prisma.ConversationGetPayload<{
-  include: typeof conversationPopulated;
-}>;
-
-export type participantPopulated = Prisma.ConversationParticipantGetPayload<{
-  include: typeof participantPopulated;
-}>;
-
-export interface ConversationCreatedSubscriptionPayload {
-  conversationCreated: ConversationPopulated;
-}
-
-export interface ConversationUpdatedSubscriptionPayload {
-  conversationUpdated: {
-    conversation: ConversationPopulated;
-    addedUserIds: Array<string>;
-    removedUserIds: Array<string>;
-  };
-}
-
-export interface ConversationDeletedSubscriptionPayload {
-  conversationDeleted: ConversationPopulated;
-}
-
-/**
- * Messages
- */
-
-export interface SendMessageArguements {
-  id: string;
-  conversationId: string;
-  senderId: string;
-  body: string;
-}
-
-export interface MessageSentSubscriptionPayload {
-  messageSent: MessagePopulated;
 }

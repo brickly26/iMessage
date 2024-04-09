@@ -24,18 +24,19 @@ import {
   SearchUsersVariables,
   SearchedFriend,
   SearchedUser,
+  User,
 } from "../../../../util/types";
 import UserSearchList from "./UserSearchList";
 import Participants from "./Participants";
 import toast from "react-hot-toast";
 import conversationOperations from "../../../../graphql/operations/conversation";
-import { Session } from "next-auth";
+
 import { useRouter } from "next/router";
 import ConversationItem from "../ConversationItem";
 import FriendSearchList from "./FriendSearchList";
 
 interface ConversationModalProps {
-  session: Session;
+  user: User;
   isOpen: boolean;
   onClose: () => void;
   conversations: Array<ConversationPopulated>;
@@ -50,7 +51,7 @@ interface ConversationModalProps {
 }
 
 const ConversationModal: React.FC<ConversationModalProps> = ({
-  session,
+  user,
   isOpen,
   onClose,
   conversations,
@@ -63,9 +64,7 @@ const ConversationModal: React.FC<ConversationModalProps> = ({
   const [existingConversation, setExistingConversation] =
     useState<ConversationPopulated | null>(null);
 
-  const {
-    user: { id: userId },
-  } = session;
+  const { id: userId } = user;
 
   const router = useRouter();
 

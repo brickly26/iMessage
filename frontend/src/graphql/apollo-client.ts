@@ -2,7 +2,6 @@ import { ApolloClient, HttpLink, InMemoryCache, split } from "@apollo/client";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { createClient } from "graphql-ws";
-import { getSession } from "next-auth/react";
 
 let apolloHTTPUrl = process.env.APOLLO_HTTP_URL as string;
 
@@ -17,12 +16,12 @@ const httpLink = new HttpLink({
 });
 
 const wsLink =
-  typeof window !== "undefined"
+  typeof window !== "undefined" && typeof document !== null
     ? new GraphQLWsLink(
         createClient({
           url: apolloWSUrl,
           connectionParams: async () => ({
-            session: await getSession(),
+            cookies: document.cookie,
           }),
         })
       )
@@ -48,5 +47,12 @@ console.log("link", link);
 export const client = new ApolloClient({
   link,
   cache: new InMemoryCache(),
-  credentials: "include",
 });
+
+export const createApolloClient = () => {
+  return new ApolloClient({
+    uri: apolloHTTPUrl,
+    cache: new InMemoryCache(),
+    credentials: "include",
+  });
+};

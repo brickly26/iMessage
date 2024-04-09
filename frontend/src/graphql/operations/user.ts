@@ -12,6 +12,14 @@ const friendRequestFields = `
 
 const userOperations = {
   Queries: {
+    me: gql`
+      query Me {
+        me {
+          id
+          username
+        }
+      }
+    `,
     searchUsers: gql`
       query SearchUsers($username: String!) {
         searchUsers(username: $username) {
@@ -38,12 +46,25 @@ const userOperations = {
     `,
   },
   Mutation: {
+    register: gql`
+      mutation Register($username: String!, $password: String!) {
+        register(username: $username, password: $password) {
+          id
+          username
+        }
+      }
+    `,
     login: gql`
       mutation Login($username: String!, $password: String!) {
         login(username: $username, password: $password) {
           id
           username
         }
+      }
+    `,
+    signOut: gql`
+      mutation SignOut {
+        signOut
       }
     `,
     createUsername: gql`

@@ -1,39 +1,54 @@
-import { Box } from "@chakra-ui/react";
+import { Box, Center, Spinner } from "@chakra-ui/react";
 import type { NextPage, NextPageContext } from "next";
-import { getSession, useSession } from "next-auth/react";
 import Auth from "../components/Auth/Auth";
 import Chat from "../components/Chat/Chat";
-import { Session } from "next-auth";
+import { useLazyQuery, useQuery } from "@apollo/client";
+import userOperations from "../graphql/operations/user";
+import { User } from "../util/types";
+import { useEffect } from "react";
+import router from "next/router";
+import { getServers } from "dns";
+import { createApolloClient } from "../graphql/apollo-client";
 
 const Home: NextPage = () => {
-  const { data: session } = useSession();
+  const { data, loading } = useQuery<{ me: User | null }>(
+    userOperations.Queries.me
+  );
 
-  const reloadSession = () => {
-    const event = new Event("visibilitychange");
-    document.dispatchEvent(event);
+  const reloadSession = async () => {
+    router.reload();
   };
+
+  // useEffect(() => {
+  //   me();
+  // }, []);
+
+  console.log(data);
 
   return (
     <>
       <Box>
-        {session?.user?.username ? (
-          <Chat session={session} />
-        ) : (
-          <Auth session={session} reloadSession={reloadSession} />
+        {loading && (
+          <Center h="100vh">
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="brand.100"
+              size="xl"
+            />
+          </Center>
+        )}
+        {!loading && data?.me && <Chat user={data.me} />}
+        {!loading && !data?.me && (
+          <Auth
+            user={data?.me ? data?.me : null}
+            reloadSession={reloadSession}
+          />
         )}
       </Box>
     </>
   );
 };
-
-export async function getServerSideProps(context: NextPageContext) {
-  const session = await getSession(context);
-
-  return {
-    props: {
-      session,
-    },
-  };
-}
 
 export default Home;

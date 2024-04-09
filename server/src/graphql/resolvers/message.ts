@@ -1,12 +1,13 @@
 import { GraphQLError } from "graphql";
 import { withFilter } from "graphql-subscriptions";
-import { userIsConversationParticipant } from "../../util/functions";
+import { userIsConversationParticipant } from "../../utils/functions";
 import {
   GraphQLContext,
+  GraphQLWSContext,
   MessagePopulated,
   MessageSentSubscriptionPayload,
   SendMessageArguements,
-} from "../../util/types";
+} from "../../utils/types";
 import { conversationPopulated, messagePopulated } from "./conversations";
 
 const resolvers = {
@@ -16,16 +17,14 @@ const resolvers = {
       args: { conversationId: string },
       context: GraphQLContext
     ): Promise<Array<MessagePopulated>> => {
-      const { session, prisma } = context;
+      const { req, prisma } = context;
       const { conversationId } = args;
 
-      if (!session?.user) {
+      if (!req.session?.userId) {
         throw new GraphQLError("Not authorized");
       }
 
-      const {
-        user: { id: userId },
-      } = session;
+      const { userId } = req.session;
 
       // Verify that conversation exisits and user is a participant
       const conversation = await prisma.conversation.findUnique({
@@ -117,15 +116,13 @@ const resolvers = {
       args: SendMessageArguements,
       context: GraphQLContext
     ): Promise<boolean> => {
-      const { session, prisma, pubsub } = context;
+      const { req, prisma, pubsub } = context;
 
-      if (!session?.user) {
+      if (!req.session?.userId) {
         throw new GraphQLError("Not authorized");
       }
 
-      const {
-        user: { id: userId },
-      } = session;
+      const { userId } = req.session;
       const { id: messageId, senderId, conversationId, body } = args;
 
       if (userId !== senderId) {
@@ -219,7 +216,7 @@ const resolvers = {
   Subscription: {
     messageSent: {
       subscribe: withFilter(
-        (_: any, __: any, context: GraphQLContext) => {
+        (_: any, __: any, context: GraphQLWSContext) => {
           const { pubsub } = context;
           return pubsub.asyncIterator(["MESSAGE_SENT"]);
         },

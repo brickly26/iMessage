@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "esModuleInterop": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmitOnError": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "typeRoots": ["./src/typings", "./node_modules/@types"],
+    "moduleResolution": "node",
+    "lib": ["ES2019"],
+    "module": "commonjs",
+    "target": "ES2019",
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src"]
+}

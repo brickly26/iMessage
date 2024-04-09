@@ -13,7 +13,7 @@ import {
 import { useState } from "react";
 import UserSearchList from "./UserSearchList";
 import toast from "react-hot-toast";
-import { Session } from "next-auth";
+
 import { useRouter } from "next/router";
 import AddFriend from "./AddFriend";
 import FriendRequestList from "./FriendRequestList";

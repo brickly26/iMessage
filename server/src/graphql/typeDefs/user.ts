@@ -32,12 +32,20 @@ const typeDefs = gql`
     friendRequests: [FriendRequest]
   }
 
+  type Query {
+    me: User
+  }
+
   type Mutation {
     register(username: String!, password: String!): User
   }
 
   type Mutation {
-    login(username: String!, password: String!): Boolean
+    login(username: String!, password: String!): User
+  }
+
+  type Mutation {
+    signOut: Boolean
   }
 
   type Mutation {

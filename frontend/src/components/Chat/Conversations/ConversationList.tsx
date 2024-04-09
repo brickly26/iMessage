@@ -1,5 +1,5 @@
 import { Box, Button, Flex, IconButton, Text } from "@chakra-ui/react";
-import { Session } from "next-auth";
+
 import ConversationModal from "./Modal/ConversationModal";
 import { useEffect, useState } from "react";
 import {
@@ -9,9 +9,9 @@ import {
   FriendRequestsData,
   ParticipantPopulated,
   SendFriendRequestData,
+  User,
 } from "../../../util/types";
 import ConversationItem from "./ConversationItem";
-import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import conversationOperations from "../../../graphql/operations/conversation";
@@ -24,7 +24,7 @@ import userOperations from "../../../graphql/operations/user";
 import { css } from "@emotion/react";
 
 interface ConversationListProps {
-  session: Session;
+  user: User;
   conversations: Array<ConversationPopulated>;
   onViewConversation: (
     conversationId: string,
@@ -33,14 +33,12 @@ interface ConversationListProps {
 }
 
 const ConversationList: React.FC<ConversationListProps> = ({
-  session,
+  user,
   conversations,
   onViewConversation,
 }) => {
   const router = useRouter();
-  const {
-    user: { id: userId },
-  } = session;
+  const { id: userId } = user;
 
   const [editingConversation, setEditingConversation] =
     useState<ConversationPopulated | null>(null);
@@ -167,6 +165,8 @@ const ConversationList: React.FC<ConversationListProps> = ({
   /**
    * Mutations
    */
+  const [signOut] = useMutation(userOperations.Mutation.signOut);
+
   const [updateParticipants, { loading: updateParticipantsLoading }] =
     useMutation<
       { updateParticipants: boolean },
@@ -228,7 +228,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
 
   const getUserParticipantObject = (conversation: ConversationPopulated) => {
     return conversation.participants.find(
-      (p) => p.user.id === session.user.id
+      (p) => p.user.id === user.id
     ) as ParticipantPopulated;
   };
 
@@ -245,6 +245,17 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const sortedConversations = [...conversations].sort(
     (a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf()
   );
+
+  const signOutHandler = async () => {
+    try {
+      signOut();
+      await router.replace("?conversationId", "/");
+      router.reload();
+    } catch (error: any) {
+      console.log("signout error", error);
+      toast.error(error.message);
+    }
+  };
 
   return (
     <Box
@@ -310,7 +321,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
       <AddFriendModal
         isOpen={isOpenAddFriend}
         onClose={onCloseAddFriend}
-        session={session}
+        user={user}
       />
 
       {friendRequestsData && (
@@ -324,7 +335,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
       <ConversationModal
         isOpen={isOpenConvo}
         onClose={toggleCloseConvo}
-        session={session}
+        user={user}
         conversations={conversations}
         editingConversation={editingConversation}
         getUserParticipantObject={getUserParticipantObject}
@@ -332,7 +343,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
       />
       {sortedConversations.map((conversation) => {
         const participant = conversation.participants.find(
-          (p) => p.userId === session.user.id
+          (p) => p.userId === user.id
         );
         return (
           <ConversationItem
@@ -354,7 +365,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
         );
       })}
       <Box position="absolute" bottom={0} left={0} width="100%" px={8}>
-        <Button onClick={() => signOut()} width="100%">
+        <Button onClick={signOutHandler} width="100%">
           sign out
         </Button>
       </Box>

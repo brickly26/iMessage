@@ -31,7 +31,7 @@ const FriendSearchList: React.FC<FriendSearchListProps> = ({
               borderRadius={4}
               _hover={{ bg: "whiteAlpha.200" }}
             >
-              <Avatar src={friend.image} />
+              <Avatar />
               <Flex justify="space-between" align="center" width="100%">
                 <Text color="whiteAlpha.700">{friend.username}</Text>
                 <Button
