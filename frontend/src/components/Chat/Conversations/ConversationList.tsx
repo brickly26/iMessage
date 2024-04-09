@@ -343,7 +343,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
       />
       {sortedConversations.map((conversation) => {
         const participant = conversation.participants.find(
-          (p) => p.userId === user.id
+          (p) => p.user.id === user.id
         );
         return (
           <ConversationItem

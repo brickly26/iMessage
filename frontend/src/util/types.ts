@@ -1,5 +1,3 @@
-import { Prisma } from "@prisma/client";
-
 export interface Session {
   user: User;
 }
@@ -12,35 +10,6 @@ export interface User {
 /**
  * Prisma validator for conversation and participants
  */
-
-export const participantPopulated =
-  Prisma.validator<Prisma.ConversationParticipantInclude>()({
-    user: {
-      select: {
-        id: true,
-        username: true,
-      },
-    },
-  });
-
-export const messagePopulated = Prisma.validator<Prisma.MessageInclude>()({
-  sender: {
-    select: {
-      id: true,
-      username: true,
-    },
-  },
-});
-
-export const conversationPopulated =
-  Prisma.validator<Prisma.ConversationInclude>()({
-    participants: {
-      include: participantPopulated,
-    },
-    latestMessage: {
-      include: messagePopulated,
-    },
-  });
 
 /**
  * USER TYPES
@@ -145,9 +114,17 @@ export interface DeclineFriendRequestSubscriptionData {
  * CONVERSATION TYPES
  */
 
-export type ParticipantPopulated = Prisma.ConversationParticipantGetPayload<{
-  include: typeof participantPopulated;
-}>;
+export interface ParticipantPopulated {
+  user: {
+    id: string;
+    username: string;
+  };
+  hasSeenLatestMessage: boolean;
+}
+
+// export type ParticipantPopulated = Prisma.ConversationParticipantGetPayload<{
+//   include: typeof participantPopulated;
+// }>;
 
 export interface ConversationsData {
   conversations: Array<ConversationPopulated>;
@@ -196,17 +173,29 @@ export interface ConversationDeletedData {
   };
 }
 
-export type ConversationPopulated = Prisma.ConversationGetPayload<{
-  include: typeof conversationPopulated;
-}>;
+export interface ConversationPopulated {
+  id: string;
+  participants: Array<ParticipantPopulated>;
+  latestMessage: {
+    include: MessagePopulated;
+  };
+  updatedAt: Date;
+}
 
 /**
  * Messages
  */
 
-export type MessagePopulated = Prisma.MessageGetPayload<{
-  include: typeof messagePopulated;
-}>;
+export interface MessagePopulated {
+  id: string;
+  sender: {
+    id: string;
+    username: string;
+    friendshipStatus: string;
+  };
+  body: string;
+  createdAt: Date;
+}
 
 export interface MessageIsFriend {
   id: string;
