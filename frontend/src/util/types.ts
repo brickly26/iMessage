@@ -176,9 +176,7 @@ export interface ConversationDeletedData {
 export interface ConversationPopulated {
   id: string;
   participants: Array<ParticipantPopulated>;
-  latestMessage: {
-    include: MessagePopulated;
-  };
+  latestMessage: MessagePopulated;
   updatedAt: Date;
 }
 
