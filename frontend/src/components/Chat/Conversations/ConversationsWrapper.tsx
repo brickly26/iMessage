@@ -20,10 +20,12 @@ import toast from "react-hot-toast";
 
 interface ConversationsWrapperProps {
   user: User;
+  reloadSession: () => void;
 }
 
 const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
   user,
+  reloadSession,
 }) => {
   const router = useRouter();
   const {
@@ -333,6 +335,7 @@ const ConversationsWrapper: React.FC<ConversationsWrapperProps> = ({
           user={user}
           conversations={conversationsData?.conversations || []}
           onViewConversation={onViewConversation}
+          reloadSession={reloadSession}
         />
       )}
     </Box>

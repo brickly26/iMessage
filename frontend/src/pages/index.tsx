@@ -1,14 +1,11 @@
 import { Box, Center, Spinner } from "@chakra-ui/react";
-import type { NextPage, NextPageContext } from "next";
+import type { NextPage } from "next";
 import Auth from "../components/Auth/Auth";
 import Chat from "../components/Chat/Chat";
-import { useLazyQuery, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import userOperations from "../graphql/operations/user";
 import { User } from "../util/types";
-import { useEffect } from "react";
 import router from "next/router";
-import { getServers } from "dns";
-import { createApolloClient } from "../graphql/apollo-client";
 
 const Home: NextPage = () => {
   const { data, loading } = useQuery<{ me: User | null }>(
@@ -39,7 +36,9 @@ const Home: NextPage = () => {
             />
           </Center>
         )}
-        {!loading && data?.me && <Chat user={data.me} />}
+        {!loading && data?.me && (
+          <Chat user={data.me} reloadSession={reloadSession} />
+        )}
         {!loading && !data?.me && (
           <Auth
             user={data?.me ? data?.me : null}

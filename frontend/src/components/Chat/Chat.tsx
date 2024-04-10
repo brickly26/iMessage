@@ -5,12 +5,13 @@ import { User } from "../../util/types";
 
 interface ChatProps {
   user: User;
+  reloadSession: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ user }) => {
+const Chat: React.FC<ChatProps> = ({ user, reloadSession }) => {
   return (
     <Flex height="100vh">
-      <ConversationWrapper user={user} />
+      <ConversationWrapper user={user} reloadSession={reloadSession} />
       <FeedWrapper user={user} />
     </Flex>
   );
