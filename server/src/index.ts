@@ -54,6 +54,7 @@ async function main() {
       name: "auth",
       store: redisStore,
       cookie: {
+        domain: process.env.CLIENT_ORIGIN,
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
         sameSite: "none",

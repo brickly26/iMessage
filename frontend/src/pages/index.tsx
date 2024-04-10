@@ -21,8 +21,6 @@ const Home: NextPage = () => {
     me();
   }, []);
 
-  console.log(data);
-
   return (
     <>
       <Box>
