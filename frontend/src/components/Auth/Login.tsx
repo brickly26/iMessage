@@ -33,7 +33,7 @@ const Login: React.FC<LoginProps> = ({ reloadSession, setAuthPage }) => {
 
       toast.success("Login Success");
       // reloade session to obtain new username
-      await reloadSession();
+      reloadSession();
     } catch (error: any) {
       console.log("onsubmit error", error);
       toast.error(error?.message);
