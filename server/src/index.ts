@@ -56,7 +56,7 @@ async function main() {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
-        sameSite: "lax",
+        sameSite: "none",
         secure: false, // TODO: change to true when deploying
       },
       genid: function (req) {
