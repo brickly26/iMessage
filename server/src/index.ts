@@ -55,10 +55,12 @@ async function main() {
       name: "auth",
       store: redisStore,
       cookie: {
+        domain:
+          process.env.NODE_ENV === "production" ? ".vercel.app" : undefined,
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
         sameSite: "lax",
-        secure: false, // TODO: change to true when deploying
+        secure: process.env.NODE_ENV === "production", // TODO: change to true when deploying
       },
       genid: function (req) {
         return uuidv4(); // use UUIDs for session IDs
