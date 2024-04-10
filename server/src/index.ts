@@ -57,8 +57,8 @@ async function main() {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
-        sameSite: "lax",
-        secure: false, // TODO: change to true when deploying
+        sameSite: "none",
+        secure: true, // TODO: change to true when deploying
       },
       genid: function (req) {
         return uuidv4(); // use UUIDs for session IDs
