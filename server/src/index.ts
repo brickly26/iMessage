@@ -56,10 +56,10 @@ async function main() {
       store: redisStore,
       cookie: {
         domain:
-          process.env.NODE_ENV === "production" ? "i-message.app" : undefined,
+          process.env.NODE_ENV === "production" ? ".i-message.app" : undefined,
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
-        sameSite: "lax",
+        sameSite: "none",
         secure: process.env.NODE_ENV === "production", // TODO: change to true when deploying
       },
       genid: function (req) {
