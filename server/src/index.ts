@@ -56,7 +56,9 @@ async function main() {
       store: redisStore,
       cookie: {
         domain:
-          process.env.NODE_ENV === "production" ? ".vercel.app" : undefined,
+          process.env.NODE_ENV === "production"
+            ? "https://www.i-message.app"
+            : undefined,
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
         sameSite: "lax",
