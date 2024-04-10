@@ -2,22 +2,26 @@ import { Box, Center, Spinner } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Auth from "../components/Auth/Auth";
 import Chat from "../components/Chat/Chat";
-import { useQuery } from "@apollo/client";
+import { useLazyQuery, useQuery } from "@apollo/client";
 import userOperations from "../graphql/operations/user";
 import { User } from "../util/types";
 import { useRouter } from "next/router";
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
 
 const Home: NextPage = () => {
   const router = useRouter();
 
-  const { data, loading } = useQuery<{ me: User | null }>(
+  const [me, { data, loading }] = useLazyQuery<{ me: User | null }>(
     userOperations.Queries.me
   );
 
   const reloadSession = async () => {
     router.reload();
   };
+
+  useEffect(() => {
+    me();
+  }, []);
 
   return (
     <>
