@@ -154,6 +154,7 @@ async function main() {
     "/graphql",
     expressMiddleware(server, {
       context: async ({ req, res }): Promise<GraphQLContext> => {
+        console.log("re.session", req.session);
         return {
           prisma,
           pubsub,
