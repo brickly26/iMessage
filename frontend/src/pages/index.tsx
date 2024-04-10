@@ -16,7 +16,7 @@ const Home: NextPage = () => {
   );
 
   const reloadSession = async () => {
-    router.reload();
+    me();
   };
 
   useEffect(() => {

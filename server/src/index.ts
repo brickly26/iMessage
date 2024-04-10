@@ -58,7 +58,8 @@ async function main() {
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
         sameSite: "lax",
-        domain: ".railway.app",
+        domain:
+          process.env.NODE_ENV === "production" ? ".railway.app" : undefined,
         secure: process.env.NODE_ENV === "production", // TODO: change to true when deploying
       },
       genid: function (req) {
