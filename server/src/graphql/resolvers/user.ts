@@ -270,9 +270,6 @@ const resolvers = {
 
         const passwordIsCorrect = await bcrypt.compare(password, user.password);
 
-        console.log(passwordIsCorrect);
-        console.log(user.password);
-
         if (!passwordIsCorrect) {
           throw new GraphQLError("Invaild credentials");
         }
