@@ -57,7 +57,7 @@ async function main() {
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
         sameSite: "none",
-        secure: false, // TODO: change to true when deploying
+        secure: true, // TODO: change to true when deploying
       },
       genid: function (req) {
         return uuidv4(); // use UUIDs for session IDs
@@ -91,11 +91,7 @@ async function main() {
         if (ctx.connectionParams && ctx.connectionParams.cookies) {
           const { cookies } = ctx.connectionParams;
 
-          console.log("cookies", cookies);
-
           const parsedCookie1 = cookie.parse(cookies);
-
-          console.log(parsedCookie1);
 
           const parsedCookies = cookieParser.signedCookie(
             parsedCookie1.auth,
@@ -108,17 +104,11 @@ async function main() {
             return { session, prisma, pubsub };
           }
 
-          console.log("sessionID", parsedCookies);
-
           await redisStore.get(parsedCookies, (err, cookieData) => {
             if (err) throw err;
 
-            console.log(cookieData);
-
             session = { userId: cookieData.userId };
           });
-
-          console.log(session);
 
           return { session, prisma, pubsub };
         }
