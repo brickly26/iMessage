@@ -30,7 +30,9 @@ async function main() {
   const app = express();
   const httpServer = http.createServer(app);
 
-  let redisClient = createClient();
+  let redisClient = createClient({
+    url: process.env.REDIS_URL,
+  });
   redisClient.connect().catch(console.error);
 
   let redisStore = new RedisStore({
