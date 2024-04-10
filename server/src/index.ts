@@ -34,6 +34,7 @@ async function main() {
     url: process.env.REDIS_URL,
   });
   redisClient.connect().catch(console.error);
+  app.set("trust proxy", 1);
 
   let redisStore = new RedisStore({
     disableTouch: true,
