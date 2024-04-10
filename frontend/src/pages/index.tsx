@@ -11,17 +11,13 @@ import { useEffect } from "react";
 const Home: NextPage = () => {
   const router = useRouter();
 
-  const [me, { data, loading }] = useLazyQuery<{ me: User | null }>(
+  const { data, loading } = useQuery<{ me: User | null }>(
     userOperations.Queries.me
   );
 
   const reloadSession = async () => {
-    me();
+    router.reload();
   };
-
-  useEffect(() => {
-    me();
-  }, []);
 
   return (
     <>
