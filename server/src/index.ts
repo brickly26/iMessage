@@ -34,6 +34,7 @@ async function main() {
     url: process.env.REDIS_URL,
   });
   redisClient.connect().catch(console.error);
+  app.set("trust proxy", 1);
 
   let redisStore = new RedisStore({
     disableTouch: true,
@@ -54,11 +55,10 @@ async function main() {
       name: "auth",
       store: redisStore,
       cookie: {
-        domain: process.env.CLIENT_ORIGIN,
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
-        sameSite: "none",
-        secure: true, // TODO: change to true when deploying
+        sameSite: "lax",
+        secure: false, // TODO: change to true when deploying
       },
       genid: function (req) {
         return uuidv4(); // use UUIDs for session IDs
