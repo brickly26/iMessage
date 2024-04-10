@@ -1,4 +1,4 @@
-import { ParticipantPopulated, participantPopulated } from "./types";
+import { ParticipantPopulated } from "./types";
 
 export const formatUsernames = (
   participants: Array<ParticipantPopulated>,
@@ -12,8 +12,8 @@ export const formatUsernames = (
 };
 
 export const userIsConversationParticipant = (
-  participants: Array<participantPopulated>,
+  participants: Array<ParticipantPopulated>,
   userId: string
 ): boolean => {
-  return !!participants.find((p) => p.userId === userId);
+  return !!participants.find((p) => p.user.id === userId);
 };
