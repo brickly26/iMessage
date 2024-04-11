@@ -57,7 +57,7 @@ async function main() {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         domain:
           process.env.NODE_ENV === "production" ? ".railway.app" : undefined,
         secure: process.env.NODE_ENV === "production", // TODO: change to true when deploying
@@ -147,7 +147,6 @@ async function main() {
     "/graphql",
     expressMiddleware(server, {
       context: async ({ req, res }): Promise<GraphQLContext> => {
-        console.log("re.session", req.session);
         return {
           prisma,
           pubsub,

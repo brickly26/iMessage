@@ -36,8 +36,14 @@ const typeDefs = gql`
     me: User
   }
 
+  type RegisteredUser {
+    id: String
+    username: String
+    conversationId: String
+  }
+
   type Mutation {
-    register(username: String!, password: String!): User
+    register(username: String!, password: String!): RegisteredUser
   }
 
   type Mutation {

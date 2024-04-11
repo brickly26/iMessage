@@ -201,7 +201,7 @@ const resolvers = {
       _: any,
       args: { username: string; password: string },
       context: GraphQLContext
-    ): Promise<User> => {
+    ): Promise<User & { conversationId: string }> => {
       const { username, password } = args;
       const { prisma, req } = context;
 
@@ -236,10 +236,40 @@ const resolvers = {
           },
         });
 
+        const conversation = await prisma.conversation.create({
+          data: {
+            participants: {
+              createMany: {
+                data: [
+                  { userId: user.id, hasSeenLatestMessage: true },
+                  {
+                    userId: process.env.DEV_ID as string,
+                    hasSeenLatestMessage: true,
+                  },
+                ],
+              },
+            },
+            messages: {
+              create: {
+                senderId: process.env.DEV_ID as string,
+                body: "Welcome! Thanks for checking out my project",
+              },
+            },
+          },
+        });
+
+        await prisma.message.create({
+          data: {
+            senderId: process.env.DEV_ID as string,
+            body: "You can start by sending someone a friend request",
+            conversationId: conversation.id,
+          },
+        });
+
         req.session.userId = user.id;
         req.session.username = user.username;
 
-        return user;
+        return { ...user, conversationId: conversation.id };
       } catch (error: any) {
         console.log("register error", error);
         throw new GraphQLError(error?.message);

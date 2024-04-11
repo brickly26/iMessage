@@ -51,6 +51,7 @@ const userOperations = {
         register(username: $username, password: $password) {
           id
           username
+          conversationId
         }
       }
     `,

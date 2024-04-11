@@ -251,7 +251,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const signOutHandler = async () => {
     try {
       signOut();
-      await reloadSession();
+      reloadSession();
     } catch (error: any) {
       console.log("signout error", error);
       toast.error(error.message);

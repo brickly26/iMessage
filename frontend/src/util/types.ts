@@ -31,6 +31,7 @@ export interface RegisterData {
   register: {
     id: string;
     username: string;
+    conversationId: string;
   };
 }
 
