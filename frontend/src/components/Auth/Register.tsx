@@ -20,6 +20,7 @@ import {
   UPPERCASE_REGEX,
 } from "../../util/regex";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
+import { useRouter } from "next/router";
 
 interface RegisterProps {
   reloadSession: () => void;
@@ -27,6 +28,8 @@ interface RegisterProps {
 }
 
 const Register: React.FC<RegisterProps> = ({ reloadSession, setAuthPage }) => {
+  const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -97,6 +100,9 @@ const Register: React.FC<RegisterProps> = ({ reloadSession, setAuthPage }) => {
 
       toast.success("Registered!");
       // reloade session to obtain new username
+      await router.push({
+        query: { conversationId: data.register.conversationId },
+      });
       reloadSession();
     } catch (error: any) {
       console.log("Register", error);

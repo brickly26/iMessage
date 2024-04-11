@@ -119,15 +119,15 @@ const resolvers = {
          * Find all conversations that user is part of
          */
         const conversations = await prisma.conversation.findMany({
-          // where: {
-          //   participants: {
-          //     some: {
-          //       userId: {
-          //         equals: userId,
-          //       },
-          //     },
-          //   },
-          // },
+          where: {
+            participants: {
+              some: {
+                userId: {
+                  equals: userId,
+                },
+              },
+            },
+          },
           include: conversationPopulated,
         });
 
@@ -135,10 +135,7 @@ const resolvers = {
          * Since above query does not work
          */
 
-        return conversations.filter(
-          (conversation) =>
-            !!conversation.participants.find((p) => p.userId === userId)
-        );
+        return conversations;
       } catch (error: any) {
         console.log("Conversations Error", error);
         throw new GraphQLError(error?.message);
