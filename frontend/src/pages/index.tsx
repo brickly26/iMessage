@@ -9,15 +9,22 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 const Home: NextPage = () => {
-  const router = useRouter();
-
-  const { data, loading } = useQuery<{ me: User | null }>(
-    userOperations.Queries.me
+  const [me, { data, loading }] = useLazyQuery<{ me: User | null }>(
+    userOperations.Queries.me,
+    { fetchPolicy: "network-only" }
   );
 
   const reloadSession = async () => {
-    router.reload();
+    // router.reload();
+    console.log("reloadSession");
+    await me();
   };
+
+  console.log("me:", data);
+
+  useEffect(() => {
+    me();
+  }, []);
 
   return (
     <>
