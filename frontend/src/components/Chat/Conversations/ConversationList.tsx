@@ -250,7 +250,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
 
   const signOutHandler = async () => {
     try {
-      signOut();
+      await signOut();
       reloadSession();
     } catch (error: any) {
       console.log("signout error", error);

@@ -6,7 +6,7 @@ import { LoginData, LoginVariables } from "../../util/types";
 import toast from "react-hot-toast";
 
 interface LoginProps {
-  reloadSession: () => void;
+  reloadSession: () => Promise<void>;
   setAuthPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -33,7 +33,7 @@ const Login: React.FC<LoginProps> = ({ reloadSession, setAuthPage }) => {
 
       toast.success("Login Success");
       // reloade session to obtain new username
-      reloadSession();
+      await reloadSession();
     } catch (error: any) {
       console.log("onsubmit error", error);
       toast.error(error?.message);
