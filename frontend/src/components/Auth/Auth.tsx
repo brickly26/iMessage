@@ -7,7 +7,7 @@ import Register from "./Register";
 
 interface AuthProps {
   user: User | null;
-  reloadSession: () => void;
+  reloadSession: () => Promise<void>;
 }
 
 const Auth: React.FC<AuthProps> = ({ user, reloadSession }) => {

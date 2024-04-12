@@ -23,7 +23,7 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useRouter } from "next/router";
 
 interface RegisterProps {
-  reloadSession: () => void;
+  reloadSession: () => Promise<void>;
   setAuthPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -103,7 +103,7 @@ const Register: React.FC<RegisterProps> = ({ reloadSession, setAuthPage }) => {
       await router.push({
         query: { conversationId: data.register.conversationId },
       });
-      reloadSession();
+      await reloadSession();
     } catch (error: any) {
       console.log("Register", error);
       toast.error(error?.message);
