@@ -110,6 +110,8 @@ async function main() {
           await redisStore.get(parsedCookies, (err, cookieData) => {
             if (err) throw err;
 
+            console.log("cookie", cookieData);
+
             session = { userId: cookieData.userId };
           });
 

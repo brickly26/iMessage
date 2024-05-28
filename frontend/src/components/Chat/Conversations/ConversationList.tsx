@@ -237,6 +237,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const onEditConversation = (conversation: ConversationPopulated) => {
     setEditingConversation(conversation);
     onOpenConvo();
+    console.log("cookie", document.cookie);
   };
 
   const toggleCloseConvo = () => {
