@@ -421,6 +421,8 @@ const resolvers = {
         ) => {
           const { session } = context;
 
+          console.log("session", session);
+
           if (!session?.userId) {
             throw new GraphQLError("Not authorized");
           }
